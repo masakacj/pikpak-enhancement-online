@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.6.22
+// @version            4.6.23
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -53218,7 +53218,7 @@ const buildCloudFileDetailsCsv = (tree, rootId, rootPath, sortItems) => {
 };
 
 
-// CSV import verified GCID -> PikPak Recycle Bin. Inlined in openManager in 4.6.22.
+// CSV import verified GCID -> PikPak Recycle Bin. Inlined in openManager in 4.6.23.
 function parsePikPakVerifiedDeletionCsv(text) {
   const input=String(text||'').replace(/^\uFEFF/,'');
   if (!input || input.length>33554432) throw Error('CSV 为空或超过 32MB');
@@ -53272,6 +53272,22 @@ function matchesVerifiedCsvLiveFile(row,result){
     String(x.hash||x.gcid||'').toUpperCase()===row.cloud_hash &&
     (!x.kind||x.kind==='drive#file');
 }
+function isVerifiedCsvFileMissingError(error) {
+  if(!error || error.authRecoveryExhausted) return false;
+  const status=Number(error.status || error.statusCode || (error.response && error.response.status) || 0);
+  if([401,403,408,429].includes(status) || status>=500) return false;
+  const code=String(error.code || (error.data && (error.data.code || error.data.error)) || '').toLowerCase();
+  const message=String(error.message || '');
+  return status===404 || /^(?:not_found|file_not_found|file_not_exist|file_or_folder_not_found)$/.test(code) ||
+    /文件或文件夹不存在|文件不存在|文件夹不存在|file(?: or folder)? (?:not found|does not exist)/i.test(message);
+}
+async function confirmVerifiedCsvFileMissing(row) {
+  if(!row.parent_id) throw Error('缺少父目录 ID，无法确认文件已不存在');
+  const siblings=await apiList(row.parent_id,1000);
+  if(!Array.isArray(siblings)) throw Error('父目录查询没有返回文件列表');
+  if(siblings.some(x=>String(x.id || '')===row.file_id))
+    throw Error('父目录中仍存在该文件，拒绝跳过');
+}
 function openVerifiedCsvTrashModal(){
   const m=showModal([
     '<h3 style="margin-bottom:12px">导入 GCID 验证 CSV → 回收站</h3>',
@@ -53317,17 +53333,26 @@ function openVerifiedCsvTrashModal(){
     const confirmed=await showConfirm('逐条复核并将匹配的 '+n+' 个文件移入回收站，是否执行？','删除前确认',{enterAction:'no'});
     if(!confirmed||!ready())return;
     working=true;stopped=false;choose.disabled=true;update();
-    let trashed=0,skipped=0,checked=0;
-    const examples=[];
+    let trashed=0,skipped=0,missing=0,checked=0;
+    const examples=[],missingExamples=[];
     try{
       for(let i=0;i<n&&!stopped;i+=50){
         const block=items.slice(i,i+50),valid=[];
         for(const row of block){
           if(stopped)break;
-          report('实时校验 '+(++checked)+'/'+n+'\n已移入回收站：'+trashed+'，不符跳过：'+skipped);
+          report('实时校验 '+(++checked)+'/'+n+'\n已移入回收站：'+trashed+'，已不存在跳过：'+missing+'，不符跳过：'+skipped);
           let actual;
           try{actual=await apiGet(row.file_id);}
-          catch(e){throw Error('云端读取失败 '+row.file_id+'：'+(e.message||e));}
+          catch(e){
+            if(isVerifiedCsvFileMissingError(e)){
+              try{await confirmVerifiedCsvFileMissing(row);}
+              catch(verifyError){throw Error('云端缺失复查失败 '+row.file_id+'：'+(verifyError.message||verifyError));}
+              missing++;
+              if(missingExamples.length<8)missingExamples.push(row.file_id);
+              continue;
+            }
+            throw Error('云端读取失败 '+row.file_id+(e.status?' (HTTP '+e.status+')':'')+'：'+(e.message||e));
+          }
           if(matchesVerifiedCsvLiveFile(row,actual))valid.push(row.file_id);
           else{skipped++;if(examples.length<8)examples.push(row.file_id);}
         }
@@ -53341,16 +53366,16 @@ function openVerifiedCsvTrashModal(){
           throw Error('批次部分失败；请先核对回收站，不要重复盲删');
         trashed+=valid.length;
       }
-      report((stopped?'已停止':'执行结束')+'\n移入回收站：'+trashed+'\n元数据不符跳过：'+skipped+
-             (examples.length?'\n示例 ID：'+examples.join(', '):''));
+      report((stopped?'已停止':'执行结束')+'\n移入回收站：'+trashed+'\n已不存在跳过：'+missing+'\n元数据不符跳过：'+skipped+
+             (missingExamples.length?'\n已不存在示例 ID：'+missingExamples.join(', '):'')+
+             (examples.length?'\n不符示例 ID：'+examples.join(', '):''));
       if(trashed&&window.pkGlobalIndex?.markAllDirty)window.pkGlobalIndex.markAllDirty();
     }catch(e){
-      report('已停止后续操作\n移入回收站：'+trashed+'\n元数据不符跳过：'+skipped+
+      report('已停止后续操作\n移入回收站：'+trashed+'\n已不存在跳过：'+missing+'\n元数据不符跳过：'+skipped+
              '\n原因：'+(e.message||e)+'\n重试前请核对云端状态。');
     }finally{working=false;choose.disabled=false;update();}
   };
 }
-
 
 if (UI.btnExport) {
 UI.btnExport.onclick = async () => {
