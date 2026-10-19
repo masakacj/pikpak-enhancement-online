@@ -1,0 +1,35 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const repo = path.resolve(__dirname, '..');
+const script = fs.readFileSync(path.join(repo, 'PikPak_Enhancement_Master.user.js'), 'utf8');
+const meta = fs.readFileSync(path.join(repo, 'PikPak_Enhancement_Master.meta.js'), 'utf8');
+const manifest = JSON.parse(fs.readFileSync(path.join(repo, 'version.json'), 'utf8'));
+const match = script.match(/^\/\/ ==UserScript==[\s\S]*?^\/\/ ==\/UserScript==/m);
+assert(match, 'Tampermonkey header exists');
+assert.equal(meta.trim(), match[0].trim(), 'metadata must exactly mirror the full script header');
+const get = key => {
+    const found = meta.match(new RegExp('^// @' + key + '\\s+(.+)$', 'm'));
+    assert(found, '@' + key + ' missing');
+    return found[1].trim();
+};
+const prefix = 'https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/';
+assert.equal(get('version'), manifest.version);
+assert.equal(get('updateURL'), prefix + 'PikPak_Enhancement_Master.meta.js');
+assert.equal(get('downloadURL'), prefix + 'PikPak_Enhancement_Master.user.js');
+assert.equal(get('namespace'), 'https://github.com/digbug82/', 'keep existing script identity for installed 4.6.20 users');
+assert.equal(get('homepage'), 'https://github.com/masakacj/pikpak-enhancement-online');
+assert.equal(manifest.downloadURL, get('downloadURL'));
+assert.equal(manifest.homepage, get('homepage'));
+assert.match(script, /scriptUpdateManifestUrl: 'https:\/\/raw\.githubusercontent\.com\/masakacj\/pikpak-enhancement-online\/main\/version\.json'/);
+assert.match(script, /scriptUpdateProjectUrl: 'https:\/\/github\.com\/masakacj\/pikpak-enhancement-online'/);
+assert(!script.includes("// @downloadURL        none"), 'auto update must not be disabled');
+assert(!script.includes('raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/version.json'), 'built-in version check must not target upstream');
+assert(script.includes("const buildCloudFileDetailsCsv = "), 'keep CSV export');
+assert(script.includes('data-fmt="csv"'), 'CSV export UI is retained');
+assert.match(script, /@license\s+AGPL-3\.0-or-later/, 'keep upstream license');
+assert(fs.existsSync(path.join(repo, 'LICENSE')), 'license included');
+assert(fs.existsSync(path.join(repo, 'THIRD_PARTY_NOTICES.md')), 'notices included');
+assert(script.length > 3100000, 'complete source delivered, not a metadata stub');
+console.log('PASS: public Tampermonkey metadata/update channel assertions');
