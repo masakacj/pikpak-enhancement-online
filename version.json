@@ -1,7 +1,7 @@
 {
-  "version": "4.6.21",
+  "version": "4.6.22",
   "updatedAt": "2026-10-19",
   "homepage": "https://github.com/masakacj/pikpak-enhancement-online",
   "downloadURL": "https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/PikPak_Enhancement_Master.user.js",
-  "changelog": "Tampermonkey auto-update channel; retained CSV export for Everything matching"
+  "changelog": "Import GCID-verified CSV, live cloud metadata recheck, two-step confirmation, move to trash only; unverified candidates are blocked"
 }
