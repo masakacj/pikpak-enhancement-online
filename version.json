@@ -1,0 +1,7 @@
+{
+  "version": "4.6.21",
+  "updatedAt": "2026-10-19",
+  "homepage": "https://github.com/masakacj/pikpak-enhancement-online",
+  "downloadURL": "https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/PikPak_Enhancement_Master.user.js",
+  "changelog": "Tampermonkey auto-update channel; retained CSV export for Everything matching"
+}
