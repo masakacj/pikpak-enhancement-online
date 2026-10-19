@@ -1,7 +1,7 @@
 {
-  "version": "4.6.22",
+  "version": "4.6.23",
   "updatedAt": "2026-10-19",
   "homepage": "https://github.com/masakacj/pikpak-enhancement-online",
   "downloadURL": "https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/PikPak_Enhancement_Master.user.js",
-  "changelog": "Import GCID-verified CSV, live cloud metadata recheck, two-step confirmation, move to trash only; unverified candidates are blocked"
+  "changelog": "Skip cloud files missing from their original parent after recheck during GCID-verified CSV trash; auth, network and uncertain errors still abort the batch."
 }
