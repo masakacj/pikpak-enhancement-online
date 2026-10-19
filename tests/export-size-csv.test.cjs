@@ -36,7 +36,7 @@ assert(!csv.includes('"999"'), 'folder size must not be treated as file size');
 assert.equal((current.match(/data-fmt="csv"/g) || []).length, 1, 'CSV option added once');
 assert(current.includes("maxRetries: format === 'csv' ? 3 : Infinity"), 'CSV retries bounded');
 assert(current.includes("throw new Error((L.msg_export_detail_incomplete"), 'CSV aborts on partial traversal');
-assert(current.includes("// @version            4.6.21"));
+assert(current.includes("// @version            4.6.22"));
 assert(current.includes("// @downloadURL        https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/PikPak_Enhancement_Master.user.js"));
 assert(current.includes("// @license            AGPL-3.0-or-later"));
 console.log('PASS: PikPak CSV export regression assertions');
