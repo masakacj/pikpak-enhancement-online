@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.6.21
+// @version            4.6.22
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -53217,6 +53217,141 @@ const buildCloudFileDetailsCsv = (tree, rootId, rootPath, sortItems) => {
     return '\uFEFF' + rows.join('\r\n') + '\r\n';
 };
 
+
+// CSV import verified GCID -> PikPak Recycle Bin. Inlined in openManager in 4.6.22.
+function parsePikPakVerifiedDeletionCsv(text) {
+  const input=String(text||'').replace(/^\uFEFF/,'');
+  if (!input || input.length>33554432) throw Error('CSV 为空或超过 32MB');
+  let rows=[], row=[], cell='', quoted=false, afterQuote=false;
+  for(let i=0;i<input.length;i++){
+    const c=input[i];
+    if(quoted) {
+      if(c==='"') { if(input[i+1]==='"'){cell+='"';i++;}else{quoted=false;afterQuote=true;} }
+      else cell+=c;
+    } else if(c==='"') {
+      if(cell || afterQuote) throw Error('CSV 引号位置不正确');
+      quoted=true;
+    } else if(c===',' || c==='\n' || c==='\r') {
+      row.push(cell);cell='';afterQuote=false;
+      if(c!==','){ rows.push(row);row=[]; if(c==='\r'&&input[i+1]==='\n')i++; }
+    } else {
+      if(afterQuote) throw Error('CSV 引号后存在非法字符');
+      cell+=c;
+    }
+  }
+  if(quoted)throw Error('CSV 引号未闭合');
+  if(cell || row.length){row.push(cell);rows.push(row);}
+  while(rows.length && rows[rows.length-1].every(x=>!x))rows.pop();
+  if(rows.length<2)throw Error('CSV 无记录');
+  const cols=rows.shift();
+  const required=['cloud_path','filename','size_bytes','file_id','parent_id','cloud_hash','verification_status','local_gcid','local_path','verified_at'];
+  if(new Set(cols).size!==cols.length||required.some(x=>!cols.includes(x)))throw Error('CSV 缺少 GCID 精确验证列');
+  if(rows.length>50000)throw Error('超过50,000条导入上限');
+  const seen=new Set(), items=[];
+  for(const values of rows){
+    if(values.length!==cols.length)throw Error('CSV 列数异常');
+    const d=Object.fromEntries(cols.map((c,i)=>[c,values[i]]));
+    const hash=d.cloud_hash.toUpperCase();
+    if(d.verification_status!=='GCID_VERIFIED'||
+       !/^[0-9A-F]{40}$/.test(hash)||d.local_gcid.toUpperCase()!==hash||
+       !/^[A-Za-z0-9_-]{8,128}$/.test(d.file_id)||!d.filename||!d.local_path||!d.verified_at||
+       !/^(0|[1-9]\d*)$/.test(d.size_bytes)||!Number.isSafeInteger(Number(d.size_bytes))||
+       d.cloud_path.replace(/\\/g,'/').split('/').pop()!==d.filename)throw Error('发现未验证或元数据不合法的记录，拒绝整份 CSV');
+    if(seen.has(d.file_id))throw Error('重复云端 file_id');
+    seen.add(d.file_id);d.cloud_hash=hash;items.push(d);
+  }
+  return items;
+}
+function matchesVerifiedCsvLiveFile(row,result){
+  const x=result&&(result.file||result);
+  if(!x||typeof x!=='object')return false;
+  return String(x.id||'')===row.file_id &&
+    String(x.name||'')===row.filename &&
+    String(x.size??'')===row.size_bytes &&
+    String(x.parent_id||'')===String(row.parent_id||'') &&
+    String(x.hash||x.gcid||'').toUpperCase()===row.cloud_hash &&
+    (!x.kind||x.kind==='drive#file');
+}
+function openVerifiedCsvTrashModal(){
+  const m=showModal([
+    '<h3 style="margin-bottom:12px">导入 GCID 验证 CSV → 回收站</h3>',
+    '<div style="font-size:13px;line-height:1.7">仅接受 GCID 精确验证的 CSV。执行前，逐条校验 PikPak 上实时的 ID、父目录、名称、字节大小及 GCID。只移入回收站，不永久删除。</div>',
+    '<input id="pk-vcsv-file" type="file" accept=".csv,text/csv" style="width:100%;margin:14px 0;color:var(--pk-fg)">',
+    '<pre id="pk-vcsv-status" style="font-size:13px;white-space:pre-wrap;color:var(--pk-fg)">尚未导入。导入只预览，不会执行删除。</pre>',
+    '<p style="margin-top:10px;font-size:13px">输入 <b id="pk-vcsv-code">TRASH N</b> 以确认执行</p>',
+    '<input id="pk-vcsv-typed" autocomplete="off" placeholder="TRASH N" style="width:100%;padding:10px;border:1px solid var(--pk-bd);background:var(--pk-bg);color:var(--pk-fg)">',
+    '<div class="pk-modal-act"><button class="pk-btn" id="pk-vcsv-stop">关闭/停止</button>',
+    '<button class="pk-btn pri" id="pk-vcsv-run" disabled>实时复核后移入回收站</button></div>'
+  ].join(''));
+  const box=m.querySelector('.pk-modal');if(box){box.style.width='580px';box.style.maxWidth='95vw';}
+  const choose=m.querySelector('#pk-vcsv-file'), status=m.querySelector('#pk-vcsv-status'),
+        code=m.querySelector('#pk-vcsv-code'),typed=m.querySelector('#pk-vcsv-typed'),
+        run=m.querySelector('#pk-vcsv-run'),stop=m.querySelector('#pk-vcsv-stop');
+  let items=[],working=false,stopped=false;
+  const report=msg=>{status.textContent=msg;};
+  const ready=()=>!working&&items.length>0&&typed.value.trim()==='TRASH '+items.length;
+  const update=()=>{run.disabled=!ready();};
+  typed.addEventListener('input',update);
+  choose.addEventListener('change',async()=>{
+    items=[];typed.value='';update();
+    const file=choose.files&&choose.files[0];if(!file)return;
+    if(file.size>33554432){report('CSV超过32MB');return;}
+    try{
+      items=parsePikPakVerifiedDeletionCsv(await file.text());
+      code.textContent='TRASH '+items.length;
+      const bytes=items.reduce((n,r)=>n+Number(r.size_bytes),0);
+      report('GCID验证记录：'+items.length+'\n体积：'+(bytes/1073741824).toFixed(2)+' GiB\n已通过导入校验，待手动确认。');
+    }catch(e){report('导入失败：'+(e.message||e));}
+    update();
+  });
+  stop.onclick=()=>{
+    if(!working)m.remove();else{stopped=true;report(status.textContent+'\n停止请求已记录');}
+  };
+  const close=m.querySelector('.pk-modal-close');
+  if(close)close.addEventListener('click',e=>{
+    if(working){e.preventDefault();e.stopImmediatePropagation();stopped=true;}
+  },true);
+  run.onclick=async()=>{
+    if(!ready())return;
+    const n=items.length;
+    const confirmed=await showConfirm('逐条复核并将匹配的 '+n+' 个文件移入回收站，是否执行？','删除前确认',{enterAction:'no'});
+    if(!confirmed||!ready())return;
+    working=true;stopped=false;choose.disabled=true;update();
+    let trashed=0,skipped=0,checked=0;
+    const examples=[];
+    try{
+      for(let i=0;i<n&&!stopped;i+=50){
+        const block=items.slice(i,i+50),valid=[];
+        for(const row of block){
+          if(stopped)break;
+          report('实时校验 '+(++checked)+'/'+n+'\n已移入回收站：'+trashed+'，不符跳过：'+skipped);
+          let actual;
+          try{actual=await apiGet(row.file_id);}
+          catch(e){throw Error('云端读取失败 '+row.file_id+'：'+(e.message||e));}
+          if(matchesVerifiedCsvLiveFile(row,actual))valid.push(row.file_id);
+          else{skipped++;if(examples.length<8)examples.push(row.file_id);}
+        }
+        if(stopped||!valid.length)continue;
+        const response=await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchTrash',{
+          method:'POST',headers:getHeaders(),body:JSON.stringify({ids:valid})
+        });
+        if(!response.ok)throw Error('回收站 API '+response.status);
+        const payload=await response.json().catch(()=>({}));
+        if(payload.error||(Array.isArray(payload.failed)&&payload.failed.length))
+          throw Error('批次部分失败；请先核对回收站，不要重复盲删');
+        trashed+=valid.length;
+      }
+      report((stopped?'已停止':'执行结束')+'\n移入回收站：'+trashed+'\n元数据不符跳过：'+skipped+
+             (examples.length?'\n示例 ID：'+examples.join(', '):''));
+      if(trashed&&window.pkGlobalIndex?.markAllDirty)window.pkGlobalIndex.markAllDirty();
+    }catch(e){
+      report('已停止后续操作\n移入回收站：'+trashed+'\n元数据不符跳过：'+skipped+
+             '\n原因：'+(e.message||e)+'\n重试前请核对云端状态。');
+    }finally{working=false;choose.disabled=false;update();}
+  };
+}
+
+
 if (UI.btnExport) {
 UI.btnExport.onclick = async () => {
 if (S.trashMode) return;
@@ -53254,6 +53389,7 @@ const m = showModal(`
 </div>
 </div>
 <div class="pk-modal-act">
+<button class="pk-btn" id="exp_import_gcdelete" type="button" style="height:40px">导入验证 CSV 删除</button>
 <button class="pk-btn" id="exp_cancel" style="height:40px; padding:0 20px;">${L.btn_cancel}</button>
 <button class="pk-btn pri" id="exp_confirm" style="height:40px; padding:0 30px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold;">${L.btn_ok}</button>
 </div>
@@ -53287,6 +53423,7 @@ selectedFormat = card.dataset.fmt;
 };
 });
 
+m.querySelector('#exp_import_gcdelete').onclick = () => { m.remove(); resolve(null); setTimeout(openVerifiedCsvTrashModal, 0); };
 m.querySelector('#exp_cancel').onclick = () => { m.remove(); resolve(null); };
 m.querySelector('.pk-modal-close').onclick = () => { m.remove(); resolve(null); };
 m.querySelector('#exp_confirm').onclick = () => { m.remove(); resolve(selectedFormat); };
