@@ -1,7 +1,12 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const source=fs.readFileSync(__dirname+'/pikpak_csv_delete_extension.js','utf8');
+const path=require('node:path');
+const full=fs.readFileSync(path.join(__dirname,'..','PikPak_Enhancement_Master.user.js'),'utf8');
+const start=full.indexOf('function parsePikPakVerifiedDeletionCsv(');
+const end=full.indexOf('\nif (UI.btnExport) {\nUI.btnExport.onclick = async () => {',start);
+assert(start>0&&end>start,'integrated CSV parser and import UI exist');
+const source=full.slice(start,end);
 const ctx={};
 vm.createContext(ctx);
 vm.runInContext(source,ctx);
