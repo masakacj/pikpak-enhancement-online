@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.6.43
+// @version            4.6.63
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -3182,6 +3182,21 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-hist-item:hover { background: var(--pk-sel-bg); }
 .pk-hist-item svg { position: static !important; width: 14px !important; height: 14px !important; color: #999; margin: 0 !important; }
 .pk-dup-toolbar { display: none; align-items: center; gap: 4px; padding: 0 8px; height: 100%; margin-left: 8px; background: transparent; border: none; flex-shrink: 0; }
+/* 4.6.57: duplicate/visual-result actions get their own wrapping row.  The main
+   toolbar becomes auto-height only while a dedupe result is active, so normal
+   file browsing keeps the compact single-row toolbar. */
+.pk-win.pk-dup-toolbar-wrap #pk-top-bar {
+    height:auto !important; min-height:50px; flex-wrap:wrap !important; align-content:center;
+    row-gap:4px !important; padding-top:5px !important; padding-bottom:5px !important;
+}
+.pk-win.pk-dup-toolbar-wrap #pk-dup-tools {
+    order:100; flex:1 0 100%; width:100%; height:auto !important; min-height:32px;
+    margin:0 !important; padding:3px 0 0 !important; border-left:0 !important; border-right:0 !important;
+    flex-wrap:wrap !important; align-items:center !important; align-content:center; row-gap:4px;
+}
+.pk-win.pk-dup-toolbar-wrap #pk-dup-tools > * { flex-shrink:0; }
+.pk-win.pk-dup-toolbar-wrap #pk-visual-dup-info { height:32px !important; min-height:32px; flex-wrap:nowrap; }
+.pk-maximized.pk-dup-toolbar-wrap #pk-top-bar { min-height:60px; }
 .pk-dup-lbl, .pk-dup-chk { white-space: nowrap !important; font-weight: 500; color: var(--pk-fg); font-size: 13px; margin-right: 6px; opacity: 0.8; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; }
 .pk-dup-chk input { margin: 0 4px 0 0; vertical-align: middle; accent-color: var(--pk-pri); width: 16px; height: 16px; }
 #pk-upload-tools { min-width: 0; flex-shrink: 0 !important; }
@@ -5416,6 +5431,11 @@ zh: {
   "lbl_dup_selected": "对选中的 {n} 个项目执行文件查重",
   "lbl_dup_current": "对当前路径下所有项目执行文件查重",
   "tip_scan_dup": "筛选或查重文件",
+  "btn_full_index": "全盘索引",
+  "tip_full_index": "建立统一全盘索引，供搜索、文件去重、文件夹去重和视觉去重共同复用；Shift+点击可强制重建。",
+  "msg_full_index_ready": "全盘索引已就绪：{folders} 个文件夹 · {files} 个文件",
+  "msg_full_index_rebuild_confirm": "当前全盘索引已经完整。是否强制重新建立全盘索引？",
+  "msg_full_index_failed": "全盘索引失败：{msg}",
   "lbl_dup_reset": "↺ 复原 (取消置顶 & 清空选择)",
   "lbl_dup_select_folder": "📂 按文件夹选择",
   "lbl_dup_select_folder_short": "📂 文件夹",
@@ -5423,7 +5443,7 @@ zh: {
   "lbl_dup_invert_short": "反选",
   "tip_dup_invert_limit": "仅按文件夹选择可用",
   "btn_dup_same_folder_extras": "同夹多余",
-  "tip_dup_same_folder_extras": "按当前显示的重复组处理：默认同一文件夹内保留排序后的第 1 个；也可把父子目录链一起判断，并选择保留较浅层或较深层副本。",
+  "tip_dup_same_folder_extras": "按当前显示的重复组处理：同一保留层级内优先保留无水印副本，其次保留文件更大的；若最终保留的仍疑似有水印，会标记为待人工确认。也可把父子目录链一起判断。",
   "msg_dup_same_folder_none": "当前显示结果中没有同文件夹多余副本",
   "msg_dup_same_folder_result": "已从 {groups} 个重复组中勾选 {items} 个同文件夹多余副本",
   "btn_dup_visual_verify": "视觉验证",
@@ -5460,8 +5480,8 @@ zh: {
   "msg_visual_none_media": "所选范围没有可进行视觉分析的图片或视频",
   "msg_visual_none": "没有发现达到视觉相似阈值的重复资源",
   "msg_visual_collect": "正在收集视觉媒体…",
-  "msg_visual_hash_images": "正在计算图片缩略图指纹 {done}/{total}",
-  "msg_visual_hash_videos": "正在计算视频缩略图指纹 {done}/{total}",
+  "msg_visual_hash_images": "图片缩略图处理：网络下载 {downloaded}/{network} · 本地 pHash {hashed}/{network} · 缓存命中 {cached}/{total}",
+  "msg_visual_hash_videos": "视频缩略图处理：网络下载 {downloaded}/{network} · 本地 pHash {hashed}/{network} · 缓存命中 {cached}/{total}",
   "msg_visual_match": "正在匹配视觉指纹…",
   "tag_visual_image": "视觉图片",
   "tag_visual_video": "视觉视频",
@@ -6512,6 +6532,7 @@ memoryCapturedToken = '';
 
 function purgeAllCachesOnLogout() {
 resetHeaderCache();
+try { if (window.pkLatestResultStore && typeof window.pkLatestResultStore.clearAll === 'function') void window.pkLatestResultStore.clearAll(); } catch (e) {}
 if (typeof globalCache !== 'undefined') globalCache.clear();
 if (typeof globalLineageMap !== 'undefined') globalLineageMap.clear();
 if (typeof globalParentIndex !== 'undefined') globalParentIndex.clear();
@@ -7035,7 +7056,10 @@ return all;
 
 async function apiGet(id, options = {}) {
 const headers = getHeaders();
-const requestUrl = `https://api-drive.mypikpak.com/drive/v1/files/${id}?thumbnail_size=SIZE_MEDIUM&_t=${Date.now()}`;
+const requestedThumbnailSize = ['SIZE_SMALL', 'SIZE_MEDIUM', 'SIZE_LARGE'].includes(String(options.thumbnailSize || ''))
+? String(options.thumbnailSize)
+: 'SIZE_MEDIUM';
+const requestUrl = `https://api-drive.mypikpak.com/drive/v1/files/${id}?thumbnail_size=${encodeURIComponent(requestedThumbnailSize)}&_t=${Date.now()}`;
 const requestInit = {
 headers,
 signal: options.signal || undefined
@@ -9428,8 +9452,8 @@ cache: initialCache || new Map(),
 sort: (globalSavedState && globalSavedState.sort) ? globalSavedState.sort : 'modified_time',
 dir: (globalSavedState && globalSavedState.dir !== undefined) ? globalSavedState.dir : 1,
 
-scanning: false, dupMode: false, visualDupMode: false, visualDupConfig: null, visualWatermarkOnly: false, dupRunning: false,
-dupGroupView: 'files',
+scanning: false, dupMode: false, visualDupMode: false, visualDupConfig: null, visualWatermarkOnly: false, visualFolderHighCoverageOnly: true, dupReviewOnly: false, dupSelectedGroupsOnly: false, dupRunning: false,
+dupGroupView: 'files', dupResultSortKey: '', dupResultSortDir: 1,
 dupResultSig: '',
 virtualSortMaskSig: '',
 resumeQuietUntil: 0,
@@ -10436,6 +10460,8 @@ S.scanning = false;
 S.dupMode = false;
 S.visualDupMode = false;
 S.visualDupConfig = null;
+S.dupSelectedGroupsOnly = false;
+if (UI.chkDupSelectedOnly) UI.chkDupSelectedOnly.checked = false;
 S.dupGroupView = 'files';
 S.dupResultSig = '';
 S.virtualSortMaskSig = '';
@@ -11246,7 +11272,6 @@ el.innerHTML = `
 <div class="pk-nav-btn" id="pk-nav-offline" data-pk-tip="${L.btn_nav_offline}">${CONF.icons.offline}<span>${L.btn_nav_offline}</span></div>
 <div class="pk-nav-btn" id="pk-nav-recent" data-pk-tip="${L.btn_nav_recent}">${CONF.icons.recent}<span>${L.btn_nav_recent}</span></div>
 <div class="pk-nav-btn" id="pk-nav-history" data-pk-tip="${L.btn_nav_history}">${CONF.icons.history}<span>${L.btn_nav_history}</span></div>
-<div class="pk-nav-btn" id="pk-nav-result-history" data-pk-tip="${L.btn_nav_result_history || '历史结果'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M6 3h12v6H6z"/><path d="M5 9h14v12H5z"/><path d="M8 13h8"/><path d="M8 17h5"/></svg><span>${L.btn_nav_result_history || '历史结果'}</span></div>
 <div class="pk-nav-btn" id="pk-nav-return-match" data-pk-tip="${L.tip_return_match_result || '返回最近一次查重 / 匹配结果'}" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v4"/><circle cx="10" cy="16" r="2"/><circle cx="16" cy="16" r="2"/></svg><span>${L.btn_return_match_result || '返回匹配结果'}</span></div>
 <div class="pk-nav-btn" id="pk-nav-return-search" data-pk-tip="${L.tip_return_search_result || '返回最近一次搜索结果'}" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h7"/><circle cx="16" cy="15" r="4"/><path d="m19 18 3 3"/></svg><span>${L.btn_return_search_result || '返回搜索结果'}</span></div>
 <div class="pk-nav-btn" id="pk-nav-share" data-pk-tip="${L.btn_nav_share}">${CONF.icons.navShare}<span>${L.btn_nav_share}</span></div>
@@ -11361,6 +11386,7 @@ ${mkLbl('pk-chk-name', L.tag_name, L.tag_name_short)}
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--pk-pri);"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"></path><circle cx="12" cy="12" r="2.7"></circle></svg>
     <span style="font-size:12px;font-weight:700;color:var(--pk-fg);">${L.lbl_visual_result}</span>
     <span id="pk-visual-dup-info-txt" style="font-size:12px;color:var(--pk-pri);font-weight:800;"></span>
+    <button id="pk-visual-timing-btn" class="pk-btn" type="button" style="height:24px;padding:0 7px;font-size:11px;line-height:22px;border-radius:6px;white-space:nowrap;" data-pk-tip="查看本次视觉去重各阶段耗时和最近参数对比">耗时 --</button>
     <label style="display:inline-flex;align-items:center;gap:4px;margin-left:3px;cursor:pointer;user-select:none;white-space:nowrap;" data-pk-tip="只显示至少有一个疑似水印副本的视觉重复组">
         <input id="pk-visual-watermark-only" type="checkbox" style="margin:0;accent-color:var(--pk-pri);">
         <span style="font-size:11px;color:var(--pk-fg);">含水印</span>
@@ -11382,11 +11408,27 @@ ${mkLbl('pk-chk-name', L.tag_name, L.tag_name_short)}
     <span class="pk-txt-long" style="font-size:12px; color:var(--pk-fg);">${L.lbl_dup_invert}</span>
     <span class="pk-txt-short" style="font-size:12px; color:var(--pk-fg);">${L.lbl_dup_invert_short}</span>
 </label>
+<label id="pk-dup-review-only-wrap" style="display:inline-flex;align-items:center;margin-right:6px;cursor:pointer;user-select:none;white-space:nowrap;" data-pk-tip="只显示“同夹多余”自动选择后，保留副本仍疑似带水印的重复组">
+    <input type="checkbox" id="pk-dup-review-only" style="margin:0 4px 0 0;accent-color:var(--pk-pri);">
+    <span style="font-size:11px;color:#b45309;">待人工确认</span>
+</label>
+<label id="pk-dup-selected-only-wrap" style="display:inline-flex;align-items:center;margin-right:6px;cursor:pointer;user-select:none;white-space:nowrap;" data-pk-tip="只显示至少有一个成员已勾选的重复组；组内未勾选成员仍完整显示">
+    <input type="checkbox" id="pk-dup-selected-only" style="margin:0 4px 0 0;accent-color:var(--pk-pri);">
+    <span style="font-size:11px;color:var(--pk-fg);">已勾选组</span>
+</label>
 
 <button class="pk-ana-select-btn" id="pk-dup-group-mode-btn" style="display:flex; margin-right:4px;" data-pk-tip="在重复文件组视图与按所在文件夹统计视图之间切换">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h6l2 2h10v10H3z"></path><path d="M7 12h10"></path><path d="M7 15h7"></path></svg>
     <span>按文件夹</span>
 </button>
+<button class="pk-ana-select-btn" id="pk-dup-back-files-btn" style="display:none; margin-right:4px;" data-pk-tip="返回视觉/文件重复的原始单文件列表">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="m11 18-6-6 6-6"></path></svg>
+    <span>返回文件列表</span>
+</button>
+<label id="pk-visual-folder-highcov-wrap" style="display:none;align-items:center;margin-right:6px;cursor:pointer;user-select:none;white-space:nowrap;" data-pk-tip="默认只显示：任一方至少 90% 文件在另一方存在视觉重复，且两目录互不为父子路径">
+    <input type="checkbox" id="pk-visual-folder-highcov" checked style="margin:0 4px 0 0;accent-color:var(--pk-pri);">
+    <span style="font-size:11px;color:var(--pk-fg);">高覆盖≥90%</span>
+</label>
 <button class="pk-ana-select-btn" id="pk-dup-smart-btn" style="display:flex; margin-right:4px;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
     <span>${L.btn_ana_select}</span>
@@ -11402,6 +11444,10 @@ ${mkLbl('pk-chk-name', L.tag_name, L.tag_name_short)}
 <button class="pk-ana-select-btn" id="pk-dup-merge-btn" style="display:flex; margin-right:4px;" data-pk-tip="${L.tip_dup_merge || '合并当前勾选的重复副本'}">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4v4a4 4 0 0 0 4 4h10"></path><path d="M5 20v-4a4 4 0 0 1 4-4"></path><polyline points="16 9 19 12 16 15"></polyline></svg>
     <span>${L.btn_dup_merge || '合并副本'}</span>
+</button>
+<button class="pk-ana-select-btn" id="pk-dup-exclude-btn" style="display:flex; margin-right:4px;" data-pk-tip="勾选来自两个不同路径的文件，从其中一个路径剔除在另一路径中已有的相同/相似副本">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h6l2 2h10v10H3z"></path><path d="M8 13h8"></path><path d="M10 16h4"></path><path d="M18 3v6"></path><path d="M15 6h6"></path></svg>
+    <span>剔除</span>
 </button>
 <button class="pk-ana-select-btn" id="pk-dup-folder-merge-btn" style="display:flex; margin-right:4px;" data-pk-tip="合并当前勾选重复文件所在的文件夹；整文件夹移动，内部结构保持不变">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h6l2 2h10v10H3z"></path><path d="M8 13h8"></path><path d="m13 10 3 3-3 3"></path></svg>
@@ -11452,6 +11498,10 @@ ${mkLbl('pk-chk-name', L.tag_name, L.tag_name_short)}
 
 <button class="pk-btn" id="pk-export" data-pk-tip="${L.tip_export}" disabled>
 ${CONF.icons.export} <span>${L.btn_export}</span>
+</button>
+
+<button class="pk-btn" id="pk-full-index" data-pk-tip="${L.tip_full_index || '建立统一全盘索引，供搜索和各类去重共同复用；Shift+点击可强制重建。'}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"></path></svg> <span>${L.btn_full_index || '全盘索引'}</span>
 </button>
 
 <button class="pk-btn" id="pk-scan-dup" data-pk-tip="${L.tip_scan_dup}" disabled>
@@ -11607,6 +11657,7 @@ ${CONF.icons.invert}
 
 <div class="pk-ctx-item" id="ctx-down">${ctxIcons.download} ${L.ctx_down}</div>
 <div class="pk-ctx-item" id="ctx-copy-name">${ctxIcons.copyName} ${L.ctx_copy_name}</div>
+<div class="pk-ctx-item" id="ctx-dup-scope-current" style="display:none;">${ctxIcons.locate} ${L.ctx_dup_scope_current || '当前路径下与其他相同的'}</div>
 <div class="pk-ctx-item" id="ctx-copy-link" style="display:none;">${ctxIcons.copyLink} ${L.ctx_copy_link}</div>
 <div class="pk-ctx-sep" id="sep-3"></div>
 <div class="pk-ctx-item" id="ctx-share-parse-save" style="display:none;">${CONF.icons.uploadBtn} ${L.lbl_share_save}</div>
@@ -11884,7 +11935,12 @@ chkSim: el.querySelector('#pk-chk-sim'),
 chkHash: el.querySelector('#pk-chk-hash'),
 visualDupInfo: el.querySelector('#pk-visual-dup-info'),
 visualDupInfoTxt: el.querySelector('#pk-visual-dup-info-txt'),
+visualTimingBtn: el.querySelector('#pk-visual-timing-btn'),
 chkVisualWatermarkOnly: el.querySelector('#pk-visual-watermark-only'),
+chkVisualFolderHighCov: el.querySelector('#pk-visual-folder-highcov'),
+visualFolderHighCovWrap: el.querySelector('#pk-visual-folder-highcov-wrap'),
+chkDupReviewOnly: el.querySelector('#pk-dup-review-only'),
+chkDupSelectedOnly: el.querySelector('#pk-dup-selected-only'),
 selDupFolder: el.querySelector('#pk-dup-folder-sel'),
 offTools: el.querySelector('#pk-offline-tools'),
 chkOffRun: el.querySelector('#pk-off-run'),
@@ -11895,6 +11951,7 @@ chkUpRun: el.querySelector('#pk-chk-up-run'),
 chkUpPause: el.querySelector('#pk-chk-up-pause'),
 chkUpDone: el.querySelector('#pk-chk-up-done'),
 btnAnalyze: el.querySelector('#pk-analyze'),
+btnFullIndex: el.querySelector('#pk-full-index'),
 btnVisualDedupe: el.querySelector('#pk-visual-dedupe'),
 btnExport: el.querySelector('#pk-export'),
 btnFolderFirst: el.querySelector('#pk-btn-folder-first'),
@@ -11920,10 +11977,12 @@ btnDelForever: el.querySelector('#pk-del-forever'),
 btnEmptyTrash: el.querySelector('#pk-empty-trash'),
 btnTrashBlacklistManager: el.querySelector('#pk-trash-blacklist-manager'),
 btnDupGroupMode: el.querySelector('#pk-dup-group-mode-btn'),
+btnDupBackFiles: el.querySelector('#pk-dup-back-files-btn'),
 btnDupSmart: el.querySelector('#pk-dup-smart-btn'),
 btnDupSameFolder: el.querySelector('#pk-dup-same-folder-btn'),
 btnDupVisual: el.querySelector('#pk-dup-visual-btn'),
 btnDupMerge: el.querySelector('#pk-dup-merge-btn'),
+btnDupExclude: el.querySelector('#pk-dup-exclude-btn'),
 btnDupFolderMerge: el.querySelector('#pk-dup-folder-merge-btn'),
 btnDupSort: el.querySelector('#pk-dup-sort-btn'),
 btnExit: el.querySelector('#pk-btn-exit'),
@@ -14084,6 +14143,13 @@ gmSet('pk_global_sort_pref', JSON.stringify({ sort: state.sort, dir: state.dir }
 return true;
 };
 const ANALYZE_GROUP_SORT_KEYS = new Set(['starred', 'name', 'path', 'size', 'modified_time']);
+const DUP_RESULT_SORT_KEYS = new Set(['starred', 'name', 'path', 'size', 'duration', 'modified_time']);
+const applyDupResultSortSelection = (sort) => {
+if (!S.dupMode || !DUP_RESULT_SORT_KEYS.has(sort)) return;
+if (S.dupResultSortKey === sort) S.dupResultSortDir *= -1;
+else { S.dupResultSortKey = sort; S.dupResultSortDir = 1; }
+renderDupView();
+};
 const applyAnalyzeGroupSortSelection = (sort) => {
 const cur = getCurrentPathNode();
 if (!(S.analyzeMode && cur && cur.id === 'analyze_root' && S.analyzeSimGroups)) return;
@@ -22472,89 +22538,55 @@ showAlert(`${L.str_failed} ${formatCloudErrorMessage(e)}`);
 }
 }
 
-// 4.6.25: global-search folder sizes -----------------------------------------
-// Global search works from the complete directory index. Folder API rows normally carry
-// size=0, so derive recursive bytes/file-count locally from the indexed direct listings.
-// The derived cache is tied to pkGlobalIndex revision and is automatically invalidated by
-// the existing dirty/revalidation flow after move/delete/upload/rename operations.
+// 4.6.44: recursive folder stats now come from the shared AnalysisCatalog.
 function getGlobalSearchRecursiveFolderStats() {
-const cacheKey = 'global-search-recursive-folder-stats-v1';
 try {
-    if (window.pkGlobalIndex && typeof window.pkGlobalIndex.getDerived === 'function') {
-        const cached = window.pkGlobalIndex.getDerived(cacheKey);
-        if (cached instanceof Map) return cached;
+    if (window.pkAnalysisCatalog) {
+        const snapshot = window.pkAnalysisCatalog.getFull();
+        if (snapshot && snapshot.folderStats instanceof Map) return snapshot.folderStats;
     }
 } catch (e) {}
-
 const stats = new Map();
-const parentById = new Map();
-const normalizeId = value => {
-    const id = String(value === undefined || value === null ? '' : value).trim();
-    return !id || id === 'root' ? '' : id;
-};
-let entries = [];
 try {
-    if (window.pkGlobalIndex && typeof window.pkGlobalIndex.getCompleteEntries === 'function') {
-        entries = window.pkGlobalIndex.getCompleteEntries() || [];
-    } else if (typeof globalCache !== 'undefined') {
-        entries = Array.from(globalCache.entries());
-    }
-} catch (e) { entries = []; }
-
-// Pass 1: build the folder parent chain first so file bytes can be propagated upward.
-for (const row of entries) {
-    if (!row || row.length < 2) continue;
-    const pid = normalizeId(row[0]);
-    const raw = row[1];
-    const items = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.items) ? raw.items : []);
-    if (!stats.has(pid)) stats.set(pid, { bytes: 0, files: 0 });
-    for (const item of items) {
-        if (!item || item.kind !== 'drive#folder') continue;
-        const id = normalizeId(item.id);
-        if (!id) continue;
-        const parent = normalizeId(item.parent_id !== undefined && item.parent_id !== null ? item.parent_id : pid);
-        parentById.set(id, parent);
-        if (!stats.has(id)) stats.set(id, { bytes: 0, files: 0 });
-    }
-}
-
-const addFileToAncestors = (startFolderId, bytes) => {
-    let cur = normalizeId(startFolderId);
-    const seen = new Set();
-    while (!seen.has(cur)) {
-        seen.add(cur);
-        let rec = stats.get(cur);
-        if (!rec) { rec = { bytes: 0, files: 0 }; stats.set(cur, rec); }
-        rec.bytes += Math.max(0, Number(bytes) || 0);
-        rec.files += 1;
-        if (!cur) break;
-        if (!parentById.has(cur)) break;
-        cur = normalizeId(parentById.get(cur));
-    }
-};
-
-// Pass 2: every file contributes to its direct folder and every indexed ancestor.
-for (const row of entries) {
-    if (!row || row.length < 2) continue;
-    const pid = normalizeId(row[0]);
-    const raw = row[1];
-    const items = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.items) ? raw.items : []);
-    for (const item of items) {
-        if (!item || item.kind === 'drive#folder') continue;
-        addFileToAncestors(pid, item.size);
-    }
-}
-
-try {
-    if (window.pkGlobalIndex && typeof window.pkGlobalIndex.setDerived === 'function') {
-        window.pkGlobalIndex.setDerived(cacheKey, stats);
-    }
+    const entries = window.pkGlobalIndex && typeof window.pkGlobalIndex.getCompleteEntries === 'function'
+        ? (window.pkGlobalIndex.getCompleteEntries() || []) : [];
+    const parent = new Map();
+    entries.forEach(([pid, items]) => (items || []).forEach(item => {
+        if (item && item.kind === 'drive#folder' && item.id) parent.set(String(item.id), String(pid || ''));
+    }));
+    const add = (pid, bytes) => {
+        let cur = String(pid || ''); const seen = new Set();
+        while (!seen.has(cur)) {
+            seen.add(cur); const rec = stats.get(cur) || { bytes: 0, files: 0 };
+            rec.bytes += Math.max(0, Number(bytes) || 0); rec.files++; stats.set(cur, rec);
+            if (!cur || !parent.has(cur)) break; cur = parent.get(cur) || '';
+        }
+    };
+    entries.forEach(([pid, items]) => (items || []).forEach(item => { if (item && item.kind !== 'drive#folder') add(pid, item.size); }));
 } catch (e) {}
 return stats;
 }
 
+function syncFullIndexButton() {
+if (!UI || !UI.btnFullIndex) return;
+const cur = S.path && S.path.length ? S.path[S.path.length - 1] : { id: '' };
+const isHome = !!(cur && !String(cur.id || '') && !S.trashMode && !S.shareMode && !S.shareParseMode && !S.linkBookmarkMode && !S.starredMode && !S.recentMode && !S.historyMode && !S.offlineMode && !S.uploadMode && !S.isFlattened && !S.dupMode && !S.analyzeMode);
+UI.btnFullIndex.style.display = isHome ? 'flex' : 'none';
+if (!isHome) return;
+const status = window.pkGlobalIndex && typeof window.pkGlobalIndex.getStatus === 'function' ? window.pkGlobalIndex.getStatus() : 'idle';
+const span = UI.btnFullIndex.querySelector('span');
+const ready = window.pkGlobalIndex && typeof window.pkGlobalIndex.isReady === 'function' && window.pkGlobalIndex.isReady();
+const dirtyCount = ready && typeof window.pkGlobalIndex.getDirtyCount === 'function' ? window.pkGlobalIndex.getDirtyCount() : 0;
+if (span) span.textContent = ready ? (dirtyCount ? `索引已就绪 · 待更新${dirtyCount}` : '索引已就绪') : (status === 'building' ? '索引中…' : (status === 'dirty' ? '更新索引' : (L.btn_full_index || '全盘索引')));
+UI.btnFullIndex.style.opacity = status === 'building' ? '.65' : '1';
+UI.btnFullIndex.setAttribute('data-pk-tip', ready
+    ? (dirtyCount ? `完整索引仍可直接使用；仅 ${dirtyCount} 个目录待增量校验。点击只更新这些目录，Shift+点击才全盘重建。` : '统一全盘索引已完整；搜索和各类去重将直接复用。Shift+点击可强制重建。')
+    : (L.tip_full_index || '建立统一全盘索引'));
+}
+
 async function refresh() {
 S.sortId++;
+syncFullIndexButton();
 const currentReqId = S.sortId;
 syncLocalUploadVisibility();
 if (S.linkBookmarkMode) {
@@ -22608,6 +22640,7 @@ const isStrictVirtual = S.isFlattened || S.dupMode || S.analyzeMode;
 const cur = S.path[S.path.length - 1];
 
 S.syncNavContextState();
+syncFullIndexButton();
 
 if (!isStrictVirtual) {
 restoreFolderFirstAfterStrictMode();
@@ -22968,7 +23001,8 @@ if (realMyPackId) seenIds.add(realMyPackId);
 }
 
 if (typeof globalCache !== 'undefined') {
-const globalSearchEntries = window.pkGlobalIndex ? window.pkGlobalIndex.getCompleteEntries() : globalCache;
+const catalogSnapshot = window.pkAnalysisCatalog ? window.pkAnalysisCatalog.getFull() : null;
+const globalSearchEntries = catalogSnapshot ? catalogSnapshot.entries : (window.pkGlobalIndex ? window.pkGlobalIndex.getCompleteEntries() : globalCache);
 for (const [key, files] of globalSearchEntries) {
 if (currentReqId !== S.sortId) return;
 if (!Array.isArray(files)) continue;
@@ -23979,7 +24013,172 @@ const out = [{ id: '', name: L.btn_nav_home }].concat(tail);
 return out.filter((node, idx) => idx === 0 || (node && node.id && node.id !== 'root'));
 }
 
-function annotateDupFolderMeta(item, metaMap) {
+
+// 4.6.47: keep virtual/search/dedupe result rows synchronized after mutations.
+// Results are snapshots of real cloud items, so moving a file/folder must update
+// its parent path in every live result collection instead of waiting for a new scan.
+function collectLiveResultItemObjects() {
+const out = [];
+const seen = new Set();
+const add = item => {
+    if (!item || typeof item !== 'object' || item.isHeader || !item.id || seen.has(item)) return;
+    seen.add(item); out.push(item);
+};
+[S.items, S.display, S.lastGlobalResults, S.analyzeResultItems].forEach(list => {
+    if (Array.isArray(list)) list.forEach(add);
+});
+[S.itemMap, S.dupItemMap].forEach(map => {
+    if (map instanceof Map) map.forEach(add);
+});
+return out;
+}
+
+function isResultItemUnderMovedFolder(item, movedFolderIds) {
+if (!item || !(movedFolderIds instanceof Set) || !movedFolderIds.size) return false;
+if (movedFolderIds.has(String(item.id || ''))) return true;
+let cur = normalizeRealFolderId(item.parent_id || (Array.isArray(item._lineage) && item._lineage.length ? item._lineage[item._lineage.length - 1].id : ''));
+const seen = new Set();
+for (let guard = 0; guard < 80 && cur && !seen.has(cur); guard++) {
+    if (movedFolderIds.has(String(cur))) return true;
+    seen.add(cur);
+    const parent = typeof globalParentIndex !== 'undefined' && globalParentIndex ? globalParentIndex.get(cur) : null;
+    cur = normalizeRealFolderId(parent && parent.id);
+}
+return false;
+}
+
+function rebuildResultItemParentPath(item) {
+if (!item || !item.id) return;
+let nav = [];
+try { nav = buildDupFolderNavPath(item); } catch (e) { nav = []; }
+if (!Array.isArray(nav) || !nav.length) nav = [{ id: '', name: L.btn_nav_home || '主页' }];
+const lineage = nav.slice(1).map(node => ({ id: String(node && node.id || ''), name: String(node && node.name || '') })).filter(node => node.id);
+const pathText = lineage.length ? lineage.map(node => node.name).filter(Boolean).join('/') : (L.btn_nav_home || '主页');
+item._lineage = lineage;
+item._cachedPath = pathText;
+item._dupFullPath = pathText;
+item._pathStr = pathText;
+item._dupFolderNavPath = [{ id: '', name: L.btn_nav_home || '主页' }, ...lineage.map(node => ({ ...node }))];
+item._dupFolderMeta = null;
+item._dupFolderMetaText = '';
+}
+
+function patchLiveResultStateAfterMove(movedItems, targetId, targetName = '') {
+const rows = Array.isArray(movedItems) ? movedItems.filter(Boolean) : [];
+if (!rows.length) return;
+const target = normalizeRealFolderId(targetId);
+const movedIds = new Set(rows.map(item => String(item && item.id || '')).filter(Boolean));
+const movedFolderIds = new Set(rows.filter(item => item && item.kind === 'drive#folder').map(item => String(item.id || '')).filter(Boolean));
+const movedById = new Map(rows.map(item => [String(item.id || ''), item]));
+
+// Update the authoritative parent edge first so descendant result rows can rebuild
+// their path by walking the new ancestry immediately.
+rows.forEach(item => {
+    const id = String(item && item.id || ''); if (!id) return;
+    item.parent_id = target;
+    if (item.kind === 'drive#folder' && typeof globalParentIndex !== 'undefined' && globalParentIndex) {
+        globalParentIndex.set(id, { id: target || 'root', name: targetName || '' });
+        try {
+            const parentLineage = target && typeof globalLineageMap !== 'undefined' && globalLineageMap && Array.isArray(globalLineageMap.get(target))
+                ? globalLineageMap.get(target).map(node => ({ id: String(node && node.id || ''), name: String(node && node.name || '') }))
+                : [];
+            if (typeof globalLineageMap !== 'undefined' && globalLineageMap) globalLineageMap.set(id, [...parentLineage, { id, name: String(item.name || id) }]);
+        } catch (e) {}
+    }
+});
+
+collectLiveResultItemObjects().forEach(item => {
+    const id = String(item.id || '');
+    if (movedIds.has(id)) {
+        item.parent_id = target;
+        const src = movedById.get(id);
+        if (src && src !== item) {
+            if (src.name) item.name = src.name;
+            if (src.size !== undefined) item.size = src.size;
+            if (src.modified_time) item.modified_time = src.modified_time;
+        }
+    }
+    if (movedIds.has(id) || isResultItemUnderMovedFolder(item, movedFolderIds)) rebuildResultItemParentPath(item);
+});
+
+S.dupFolderMetaCache = null;
+if (typeof clearGroupedGridMetaCache === 'function') clearGroupedGridMetaCache();
+if (typeof clearGridStableRows === 'function' && UI && UI.in) clearGridStableRows(UI.in);
+}
+
+function currentResultSnapshotType() {
+const cur = S.path && S.path.length ? S.path[S.path.length - 1] : null;
+if (S.dupMode) return S.visualDupMode ? 'visual_dup' : 'file_dup';
+if (S.analyzeMode && cur && cur.id === 'analyze_root') return S.analyzeSimGroups ? 'folder_dup' : 'folder_scan';
+if (cur && cur.id === 'virtual_search_root') return 'search';
+return '';
+}
+
+function renderCurrentResultAfterMutation() {
+const cur = S.path && S.path.length ? S.path[S.path.length - 1] : null;
+if (S.dupMode) {
+    renderDupView(); updateStat(); return;
+}
+if (S.analyzeMode && cur && cur.id === 'analyze_root') {
+    void refresh(); return;
+}
+if (cur && cur.id === 'virtual_search_root') {
+    // Preserve the current search result membership/order and only redraw the
+    // mutated metadata. Re-running global search here can momentarily resurrect a
+    // stale path while the incremental index is still revalidating.
+    S.display = Array.isArray(S.items) ? [...S.items] : [];
+    ensureItemMap();
+    renderList(); updateStat();
+}
+}
+
+function persistCurrentResultAfterMutation() {
+const type = currentResultSnapshotType();
+if (!type || typeof saveResultHistorySnapshot !== 'function') return;
+setTimeout(() => {
+    try {
+        const opts = type === 'search' ? { query: S.search || '', global: true } : {};
+        void saveResultHistorySnapshot(type, opts);
+    } catch (e) {}
+}, 0);
+}
+
+function syncCurrentResultAfterMutation() {
+renderCurrentResultAfterMutation();
+persistCurrentResultAfterMutation();
+}
+
+// Select only members of cross-path duplicate groups; path actions never delete files.
+function selectDupFilesByContextPath(rawPath, selectInside) {
+    if (!S.dupMode) return;
+    const norm = value => String(value || '').replace(/\\/g, '/').replace(/\/{2,}/g, '/').replace(/^\/+|\/+$/g, '').toLocaleLowerCase();
+    const scope = norm(rawPath);
+    const inScope = file => {
+        const path = norm(file && (file._dupFullPath || file._cachedPath || (Array.isArray(file._lineage) ? file._lineage.map(n => n && n.name || '').join('/') : '')));
+        return scope === '' ? true : path === scope || path.startsWith(scope + '/');
+    };
+    const index = S.dupItemMap instanceof Map ? S.dupItemMap : new Map((S.items || []).filter(Boolean).map(file => [file.id, file]));
+    const buckets = S.dupBuckets && Array.isArray(S.dupBuckets.all) ? S.dupBuckets.all : (S.dupRawGroups || []);
+    const selected = new Set();
+    const visibleIds = new Set((S.display || []).filter(row => row && !row.isHeader && !row._dupFolderStatsRow).map(row => String(row.id)));
+    const folderMode = S.dupGroupView === 'folders';
+    const allowedFolderIds = folderMode ? new Set((S.display || []).filter(row => row && row._dupFolderStatsRow).flatMap(row => row._dupFolderStatsFileIds || []).map(String)) : null;
+    for (const group of buckets) {
+        const members = (group && group.ids || []).map(id => index.get(id)).filter(file => file && file.kind !== 'drive#folder' && (folderMode ? allowedFolderIds.has(String(file.id)) : visibleIds.has(String(file.id))));
+        if (members.length < 2) continue;
+        const inside = members.filter(inScope);
+        const outside = members.filter(file => !inScope(file));
+        if (!inside.length || !outside.length) continue;
+        for (const file of (selectInside ? inside : outside)) selected.add(file.id);
+    }
+    if (!selected.size) { showToast('当前路径没有与其他路径相同的匹配文件', 'warning', 3500); return; }
+    S.setExplicitSelection(Array.from(selected));
+    renderVisible();
+    updateStat();
+    showToast(`已选择 ${selected.size} 个匹配文件`, 'success', 3000);
+}
+
+function annotateDupFolderMeta(item, metaMap, duplicateCountMap = null) {
 if (!item || item.kind === 'drive#folder') return;
 const L = getStrings();
 const parentIdRaw = String(item.parent_id || '');
@@ -23990,8 +24189,18 @@ if (parentKey === 'root' && Array.isArray(item._lineage) && item._lineage.length
 }
 const meta = metaMap instanceof Map ? metaMap.get(parentKey) : null;
 if (meta) {
-    item._dupFolderMeta = { size: meta.size, count: meta.count };
-    item._dupFolderMetaText = L.lbl_dup_folder_meta.replace('{size}', fmtSize(meta.size.toString())).replace('{n}', meta.count);
+    const hasDuplicateCount = duplicateCountMap instanceof Map;
+    const duplicateCount = hasDuplicateCount
+        ? Math.min(Math.max(0, Number(meta.count) || 0), Math.max(0, Number(duplicateCountMap.get(parentKey) || 0)))
+        : null;
+    item._dupFolderMeta = { size: meta.size, count: meta.count, duplicateCount };
+    // 4.6.61: both normal file-dedupe and visual single-file views use the same
+    // folder density notation as the folder-relation view. 6/35 means 6 unique
+    // files in this folder subtree participate in the CURRENT duplicate result,
+    // out of 35 files in that folder subtree.
+    item._dupFolderMetaText = hasDuplicateCount
+        ? `${fmtSize(meta.size.toString())} · ${duplicateCount}/${meta.count} 文件`
+        : L.lbl_dup_folder_meta.replace('{size}', fmtSize(meta.size.toString())).replace('{n}', meta.count);
 } else {
     item._dupFolderMeta = null;
     item._dupFolderMetaText = '';
@@ -24000,18 +24209,25 @@ item._dupFolderNavPath = buildDupFolderNavPath(item);
 }
 
 function syncDupGroupViewControls() {
+if (UI.win) UI.win.classList.toggle('pk-dup-toolbar-wrap', !!S.dupMode);
 if (!S.dupMode) return;
 const folderMode = S.dupGroupView === 'folders';
 if (UI.btnDupGroupMode) {
-    UI.btnDupGroupMode.style.display = 'flex';
+    UI.btnDupGroupMode.style.display = folderMode ? 'none' : 'flex';
     const span = UI.btnDupGroupMode.querySelector('span');
-    if (span) span.textContent = folderMode ? '按重复组' : '按文件夹';
-    UI.btnDupGroupMode.setAttribute('data-pk-tip', folderMode ? '返回原始重复文件组视图' : '按所在文件夹汇总重复资源');
+    if (span) span.textContent = S.visualDupMode ? '文件夹关系' : '按文件夹';
+    UI.btnDupGroupMode.setAttribute('data-pk-tip', S.visualDupMode ? '查看文件夹之间的高覆盖视觉重复关系' : '按所在文件夹汇总重复资源');
 }
+if (UI.btnDupBackFiles) UI.btnDupBackFiles.style.display = folderMode ? 'flex' : 'none';
+if (UI.visualFolderHighCovWrap) UI.visualFolderHighCovWrap.style.display = (folderMode && S.visualDupMode) ? 'inline-flex' : 'none';
+if (UI.chkVisualFolderHighCov) UI.chkVisualFolderHighCov.checked = S.visualFolderHighCoverageOnly !== false;
 if (UI.btnDupSmart) UI.btnDupSmart.style.display = folderMode ? 'none' : 'flex';
 if (UI.btnDupSameFolder) UI.btnDupSameFolder.style.display = folderMode ? 'none' : 'flex';
 if (UI.btnDupVisual) UI.btnDupVisual.style.display = folderMode ? 'none' : 'flex';
-if (UI.btnDupFolderMerge) UI.btnDupFolderMerge.style.display = folderMode ? 'none' : 'flex';
+if (UI.btnDupExclude) UI.btnDupExclude.style.display = folderMode ? 'none' : 'flex';
+// 4.6.58: folder relation view has an explicit back button and defaults to non-nested >=90% directional coverage.
+// 4.6.43: folder-relation view is specifically meant to decide which folders to merge.
+if (UI.btnDupFolderMerge) UI.btnDupFolderMerge.style.display = 'flex';
 if (UI.btnDupSort) UI.btnDupSort.style.display = folderMode ? 'none' : 'flex';
 const folderWrap = document.getElementById('pk-dup-folder-sel-wrap');
 const invertChk = document.getElementById('pk-dup-invert');
@@ -24128,6 +24344,80 @@ if (showHash) groupsToRender.push(...dupBuckets.hash);
 if (showSim) groupsToRender.push(...dupBuckets.sim);
 if (showName) groupsToRender.push(...dupBuckets.name);
 }
+if (S.dupReviewOnly) groupsToRender = groupsToRender.filter(g => !!(g && g._sameFolderNeedsReview));
+if (S.dupSelectedGroupsOnly) groupsToRender = groupsToRender.filter(g => !!(g && Array.isArray(g.ids) && g.ids.some(id => S.isSelected(id))));
+
+// 4.6.61: pre-compute the number of UNIQUE duplicate files per folder subtree
+// for BOTH normal file-dedupe and visual single-file result views. Propagate each
+// duplicate file to its direct parent and ancestors, matching getDupFolderMetaCache()'s
+// recursive total-file semantics. The value therefore stays meaningful beside the
+// folder's total recursive file count (e.g. 6/35).
+const visualDupFolderDuplicateCountMap = new Map();
+{
+    const folderSets = new Map();
+    const normalizeFolderIdForDupCount = id => {
+        const value = String(id || '');
+        return (!value || value === 'root') ? 'root' : value;
+    };
+    const addVisualDuplicateToFolder = (folderId, fileId) => {
+        const key = normalizeFolderIdForDupCount(folderId);
+        let set = folderSets.get(key);
+        if (!set) { set = new Set(); folderSets.set(key, set); }
+        set.add(String(fileId || ''));
+    };
+    const seenVisualFiles = new Set();
+    groupsToRender.forEach(g => {
+        (g && Array.isArray(g.ids) ? g.ids : []).forEach(id => {
+            const fileId = String(id || '');
+            if (!fileId || seenVisualFiles.has(fileId)) return;
+            const file = itemMap.get(id);
+            if (!file || file.kind === 'drive#folder') return;
+            seenVisualFiles.add(fileId);
+            const folderIds = new Set();
+            const directParent = normalizeFolderIdForDupCount(file.parent_id);
+            folderIds.add(directParent);
+            if (Array.isArray(file._lineage)) {
+                file._lineage.forEach(node => {
+                    if (node) folderIds.add(normalizeFolderIdForDupCount(node.id));
+                });
+            }
+            let currentId = directParent;
+            const seenParents = new Set();
+            for (let guard = 0; guard < 48 && currentId !== 'root' && !seenParents.has(currentId); guard++) {
+                seenParents.add(currentId);
+                const parentInfo = (typeof globalParentIndex !== 'undefined' && globalParentIndex) ? globalParentIndex.get(currentId) : null;
+                if (!parentInfo) break;
+                currentId = normalizeFolderIdForDupCount(parentInfo.id);
+                folderIds.add(currentId);
+            }
+            folderIds.add('root');
+            folderIds.forEach(folderId => addVisualDuplicateToFolder(folderId, fileId));
+        });
+    });
+    folderSets.forEach((set, key) => visualDupFolderDuplicateCountMap.set(key, set.size));
+}
+
+// 4.6.43: clicking a list header sorts WHOLE duplicate groups; members stay grouped.
+if (S.dupResultSortKey && DUP_RESULT_SORT_KEYS.has(S.dupResultSortKey)) {
+    const k = S.dupResultSortKey, dir = Number(S.dupResultSortDir) === -1 ? -1 : 1;
+    const metric = g => {
+        const arr = (g && g.ids || []).map(id => itemMap.get(id)).filter(Boolean);
+        if (!arr.length) return k === 'size' ? 0n : '';
+        if (k === 'size') return arr.reduce((m,it)=>{ try { const v=BigInt(it.size||0); return v>m?v:m; } catch(e){ return m; } },0n);
+        if (k === 'modified_time') return Math.max(...arr.map(it=>Date.parse(it.modified_time||'')||0));
+        if (k === 'duration') return Math.max(...arr.map(it=>Number(it.params?.duration || it.duration || 0)||0));
+        if (k === 'starred') return arr.reduce((n,it)=>n+(it.starred || (it.tags&&it.tags.some(t=>t.name==='STAR')) ? 1:0),0);
+        if (k === 'path') return arr.map(it=>String(getCachedPath(it)||'')).sort((a,b)=>a.localeCompare(b))[0] || '';
+        return arr.map(it=>String(it.name||'')).sort((a,b)=>a.localeCompare(b))[0] || '';
+    };
+    groupsToRender = groupsToRender.slice().sort((a,b)=>{
+        const av=metric(a), bv=metric(b); let c=0;
+        if (typeof av === 'bigint' || typeof bv === 'bigint') c = av < bv ? -1 : av > bv ? 1 : 0;
+        else if (typeof av === 'number' && typeof bv === 'number') c = av - bv;
+        else c = String(av).localeCompare(String(bv), undefined, { numeric:true, sensitivity:'base' });
+        return c * dir;
+    });
+}
 
 if (S.pinnedDupPath) {
 const pinnedGroups = [];
@@ -24159,6 +24449,7 @@ const normalizeFolderId = id => {
 const folderNodes = new Map();
 const adjacency = new Map();
 const groupRecords = new Map();
+const pairRecords = new Map();
 const fileById = new Map();
 const getFolderDesc = item => {
     const rawPath = String(getCachedPath(item) || L.btn_nav_home || '').replace(/\\/g, '/').replace(/\/{2,}/g, '/').replace(/\/+$/g, '') || L.btn_nav_home;
@@ -24197,6 +24488,7 @@ for (let gi = 0; gi < groupsToRender.length; gi++) {
     const liveItems = (g.ids || []).map(id => itemMap.get(id)).filter(Boolean);
     if (liveItems.length < 2) continue;
     const folderKeys = new Set();
+    const itemsByFolder = new Map();
     const gKey = `g${gi}:${String(g.type || '')}:${liveItems.map(it => String(it.id)).sort().join(',')}`;
     const score = Number(g.visualScore);
     groupRecords.set(gKey, { group: g, score: Number.isFinite(score) ? score : null, fileIds: liveItems.map(it => String(it.id)) });
@@ -24214,6 +24506,8 @@ for (let gi = 0; gi < groupsToRender.length; gi++) {
         const mt = String(item.modified_time || '');
         if (mt && (!node.modifiedTime || new Date(mt) > new Date(node.modifiedTime))) node.modifiedTime = mt;
         folderKeys.add(desc.key);
+        if (!itemsByFolder.has(desc.key)) itemsByFolder.set(desc.key, []);
+        itemsByFolder.get(desc.key).push(item);
     }
     const keys = Array.from(folderKeys);
     for (let a = 0; a < keys.length; a++) {
@@ -24222,7 +24516,76 @@ for (let gi = 0; gi < groupsToRender.length; gi++) {
             adjacency.get(keys[b]).add(keys[a]);
             folderNodes.get(keys[a]).peerKeys.add(keys[b]);
             folderNodes.get(keys[b]).peerKeys.add(keys[a]);
+            const ka=keys[a], kb=keys[b], pairKey=ka<kb?`${ka}\u0000${kb}`:`${kb}\u0000${ka}`;
+            let pr=pairRecords.get(pairKey);
+            if(!pr){pr={aKey:ka<kb?ka:kb,bKey:ka<kb?kb:ka,groupKeys:new Set(),fileIdsA:new Set(),fileIdsB:new Set(),bytesA:0n,bytesB:0n,matchedFiles:0,matchedBytes:0n,scores:[]};pairRecords.set(pairKey,pr);}
+            const aa=itemsByFolder.get(pr.aKey)||[], bb=itemsByFolder.get(pr.bKey)||[];
+            let ba=0n,bbx=0n;
+            aa.forEach(it=>{const id=String(it.id||''); if(!pr.fileIdsA.has(id)){pr.fileIdsA.add(id); try{pr.bytesA+=BigInt(it.size||0);}catch(e){} } try{ba+=BigInt(it.size||0);}catch(e){}});
+            bb.forEach(it=>{const id=String(it.id||''); if(!pr.fileIdsB.has(id)){pr.fileIdsB.add(id); try{pr.bytesB+=BigInt(it.size||0);}catch(e){} } try{bbx+=BigInt(it.size||0);}catch(e){}});
+            pr.groupKeys.add(gKey); pr.matchedFiles += Math.min(aa.length,bb.length); pr.matchedBytes += ba<bbx?ba:bbx;
+            if(Number.isFinite(score))pr.scores.push(score);
         }
+    }
+}
+
+// 4.6.58: visual folder-relation view is directional and merge-oriented.
+// By default only keep pairs where at least one folder has >=90% of its files
+// visually duplicated in the other folder. Parent/child paths are never shown
+// as a folder relation because recursive containment makes that relation noisy.
+if (visualMode) {
+    const normPathParts = node => String(node && node.fullPath || '').replace(/\\/g, '/').replace(/\/{2,}/g, '/').split('/').map(x => x.trim().toLocaleLowerCase()).filter(Boolean);
+    const isPathAncestor = (ancestor, child) => {
+        if (!ancestor || !child || ancestor.key === child.key) return false;
+        const aid = normalizeFolderId(ancestor.folderId), cid = normalizeFolderId(child.folderId);
+        if (aid !== 'root' && cid !== 'root' && typeof globalParentIndex !== 'undefined' && globalParentIndex) {
+            let cur = cid;
+            const seen = new Set();
+            while (cur && cur !== 'root' && !seen.has(cur)) {
+                seen.add(cur);
+                const p = globalParentIndex.get(cur);
+                if (!p || p.id === undefined || p.id === null) break;
+                const pid = normalizeFolderId(p.id);
+                if (pid === aid) return true;
+                cur = pid;
+            }
+        }
+        const a = normPathParts(ancestor), b = normPathParts(child);
+        return a.length > 0 && a.length < b.length && a.every((seg, i) => seg === b[i]);
+    };
+    const bigRatio = (n, d) => {
+        try {
+            const nn = typeof n === 'bigint' ? n : BigInt(Math.max(0, Number(n) || 0));
+            const dd = typeof d === 'bigint' ? d : BigInt(Math.max(0, Number(d) || 0));
+            if (dd <= 0n) return 0;
+            return Number((nn * 1000000n) / dd) / 1000000;
+        } catch (e) { return 0; }
+    };
+    const nodeTotals = node => {
+        const metaKey = node && node.folderId === 'root' ? 'root' : String(node && node.folderId || 'root');
+        const meta = dupFolderMetaMap instanceof Map ? dupFolderMetaMap.get(metaKey) : null;
+        return {
+            count: Math.max(0, Number(meta ? meta.count : (node ? node.fileIds.size : 0)) || 0),
+            size: meta ? meta.size : (node ? node.dupBytes : 0n)
+        };
+    };
+    adjacency.clear();
+    folderNodes.forEach(node => { adjacency.set(node.key, new Set()); node.peerKeys = new Set(); });
+    for (const pr of pairRecords.values()) {
+        const a = folderNodes.get(pr.aKey), b = folderNodes.get(pr.bKey);
+        if (!a || !b) continue;
+        if (isPathAncestor(a, b) || isPathAncestor(b, a)) continue;
+        const ta = nodeTotals(a), tb = nodeTotals(b);
+        pr._fileCovA = ta.count > 0 ? Math.max(0, Math.min(1, pr.fileIdsA.size / ta.count)) : 0;
+        pr._fileCovB = tb.count > 0 ? Math.max(0, Math.min(1, pr.fileIdsB.size / tb.count)) : 0;
+        pr._byteCovA = bigRatio(pr.bytesA, ta.size);
+        pr._byteCovB = bigRatio(pr.bytesB, tb.size);
+        const highEnough = Math.max(pr._fileCovA, pr._fileCovB) + 1e-12 >= 0.90;
+        if (S.visualFolderHighCoverageOnly !== false && !highEnough) continue;
+        adjacency.get(pr.aKey).add(pr.bKey);
+        adjacency.get(pr.bKey).add(pr.aKey);
+        a.peerKeys.add(pr.bKey);
+        b.peerKeys.add(pr.aKey);
     }
 }
 
@@ -24230,6 +24593,7 @@ const components = [];
 const visited = new Set();
 for (const key of folderNodes.keys()) {
     if (visited.has(key)) continue;
+    if (visualMode && (!adjacency.get(key) || adjacency.get(key).size === 0)) continue;
     const stack = [key];
     const compKeys = [];
     visited.add(key);
@@ -24253,6 +24617,22 @@ for (const key of folderNodes.keys()) {
     components.push({ nodes, fileIds: Array.from(compFileIds), groupKeys: compGroupKeys, dupBytes, scores });
 }
 components.sort((a, b) => {
+    const k=S.dupResultSortKey, dir=Number(S.dupResultSortDir)===-1?-1:1;
+    if(k){
+        const cm = comp => {
+            if(k==='size') return comp.dupBytes;
+            if(k==='modified_time') return Math.max(0,...comp.nodes.map(n=>Date.parse(n.modifiedTime||'')||0));
+            if(k==='starred') return comp.nodes.reduce((n,row)=>n+(row.sourceItem&&(row.sourceItem.starred||(row.sourceItem.tags&&row.sourceItem.tags.some(t=>t.name==='STAR')))?1:0),0);
+            if(k==='path') return comp.nodes.map(n=>String(n.fullPath||'')).sort((x,y)=>x.localeCompare(y))[0]||'';
+            if(k==='name') return comp.nodes.map(n=>String(n.name||'')).sort((x,y)=>x.localeCompare(y))[0]||'';
+            return 0;
+        };
+        const av=cm(a),bv=cm(b); let c=0;
+        if(typeof av==='bigint'||typeof bv==='bigint')c=av<bv?-1:av>bv?1:0;
+        else if(typeof av==='number'&&typeof bv==='number')c=av-bv;
+        else c=String(av).localeCompare(String(bv),undefined,{numeric:true,sensitivity:'base'});
+        if(c)return c*dir;
+    }
     if (a.dupBytes !== b.dupBytes) return a.dupBytes > b.dupBytes ? -1 : 1;
     if (a.groupKeys.size !== b.groupKeys.size) return b.groupKeys.size - a.groupKeys.size;
     return b.nodes.length - a.nodes.length;
@@ -24283,7 +24663,9 @@ for (const comp of components) {
         const pct = v => `${(Math.max(0, Math.min(1, v)) * 100).toFixed(1)}%`;
         scoreText = Math.abs(max - min) < 1e-9 ? ` | 视觉 ${pct(max)}` : ` | 视觉 ${pct(min)}~${pct(max)}`;
     }
-    const headerName = `${comp.nodes.length} 文件夹 | ${comp.groupKeys.size} 重复组 | ${comp.fileIds.length} 重复文件 | ${fmtSize(comp.dupBytes.toString())}${scoreText}`;
+    const headerName = visualMode
+        ? `${comp.nodes.length} 个${S.visualFolderHighCoverageOnly !== false ? '高覆盖' : ''}文件夹关系${scoreText}`
+        : `${comp.nodes.length} 文件夹 | ${comp.groupKeys.size} 重复组 | ${comp.fileIds.length} 重复文件 | ${fmtSize(comp.dupBytes.toString())}${scoreText}`;
     newDisplay.push({
         id: `grp_fs_${renderedComponentIndex}`,
         isHeader: true,
@@ -24304,7 +24686,38 @@ for (const comp of components) {
         const folderMeta = dupFolderMetaMap instanceof Map ? dupFolderMetaMap.get(folderMetaKey) : null;
         const actualSize = folderMeta ? folderMeta.size : node.dupBytes;
         const actualCount = folderMeta ? folderMeta.count : node.fileIds.size;
-        const statText = `重复 ${node.fileIds.size} 文件 · ${fmtSize(node.dupBytes.toString())} · ${node.groupKeys.size} 组${node.peerKeys.size ? ` · 关联 ${node.peerKeys.size} 目录` : ' · 目录内重复'}`;
+        // 4.6.59: in visual folder-relation view show duplicate/total file count,
+        // e.g. 6/35 means 6 files in this folder participate in at least one
+        // visual duplicate relation out of 35 files in the analyzed folder.
+        const visualDuplicateCount = Math.max(0, Number(node.fileIds.size) || 0);
+        const visualTotalCount = Math.max(visualDuplicateCount, Math.max(0, Number(actualCount) || 0));
+        const relationRows = Array.from(node.peerKeys).map(peerKey => {
+            const pairKey=node.key<peerKey?`${node.key}\u0000${peerKey}`:`${peerKey}\u0000${node.key}`;
+            const pr=pairRecords.get(pairKey), peer=folderNodes.get(peerKey); if(!pr||!peer)return null;
+            const ownIsA=pr.aKey===node.key;
+            const ownFileRatio = ownIsA ? Number(pr._fileCovA || 0) : Number(pr._fileCovB || 0);
+            const peerFileRatio = ownIsA ? Number(pr._fileCovB || 0) : Number(pr._fileCovA || 0);
+            const ownByteRatio = ownIsA ? Number(pr._byteCovA || 0) : Number(pr._byteCovB || 0);
+            const peerByteRatio = ownIsA ? Number(pr._byteCovB || 0) : Number(pr._byteCovA || 0);
+            const score=pr.scores.length?Math.min(...pr.scores):null;
+            return {peer,pr,ownFileRatio,peerFileRatio,ownByteRatio,peerByteRatio,score,matchedBytes:pr.matchedBytes};
+        }).filter(Boolean).sort((a,b)=>{
+            const ac=Math.max(a.ownFileRatio,a.peerFileRatio), bc=Math.max(b.ownFileRatio,b.peerFileRatio);
+            if (Math.abs(ac-bc)>1e-12) return bc-ac;
+            return a.matchedBytes===b.matchedBytes?0:(a.matchedBytes>b.matchedBytes?-1:1);
+        });
+        const p1 = v => `${(Math.max(0,Math.min(1,Number(v)||0))*100).toFixed(1)}%`;
+        const relationLabel = r => {
+            if (r.ownFileRatio >= .90 && r.peerFileRatio >= .90) return `与 ${r.peer.name} 高度重叠：本目录 ${p1(r.ownFileRatio)} · 对方 ${p1(r.peerFileRatio)}`;
+            if (r.ownFileRatio >= .90) return `被 ${r.peer.name} 覆盖：文件 ${p1(r.ownFileRatio)} · 容量 ${p1(r.ownByteRatio)}`;
+            return `覆盖 ${r.peer.name}：对方文件 ${p1(r.peerFileRatio)} · 本目录命中 ${p1(r.ownFileRatio)}`;
+        };
+        const relationPreview = visualMode ? relationRows.slice(0,2).map(relationLabel).join('；') : '';
+        const relationFull = visualMode
+            ? relationRows.map(r=>`${relationLabel(r)} · 本目录容量 ${p1(r.ownByteRatio)} · 对方容量 ${p1(r.peerByteRatio)}${Number.isFinite(r.score)?` · 视觉最低 ${p1(r.score)}`:''}\n${r.peer.fullPath}`).join('\n\n')
+            : '';
+        const statBase = `重复 ${node.fileIds.size} 文件 · ${fmtSize(node.dupBytes.toString())} · ${node.groupKeys.size} 组${node.peerKeys.size ? ` · 关联 ${node.peerKeys.size} 目录` : ' · 目录内重复'}`;
+        const statText = visualMode ? relationPreview : statBase;
         const syntheticId = `dupfs_${renderedComponentIndex}_${ni}_${node.key.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
         newDisplay.push({
             id: syntheticId,
@@ -24322,8 +24735,12 @@ for (const comp of components) {
             _dupFolderStatsGroupCount: node.groupKeys.size,
             _dupFolderStatsPeerCount: node.peerKeys.size,
             _dupFolderStatsBytes: node.dupBytes.toString(),
+            _dupFolderDuplicateCount: visualDuplicateCount,
+            _dupFolderTotalCount: visualTotalCount,
             _dupFolderStatsText: statText,
-            _dupFolderMetaText: `${fmtSize(actualSize.toString())} · ${actualCount} 文件`
+            _dupFolderRelationText: relationFull,
+            _dupFolderRelationVisual: !!visualMode,
+            _dupFolderMetaText: `${fmtSize(actualSize.toString())} · ${visualDuplicateCount}/${visualTotalCount} 文件`
         });
     }
     renderedComponentIndex++;
@@ -24414,7 +24831,7 @@ featureStr = `[ ${L.tag_name_short} ] `;
 }
 
 const countStr = `${activeGroupIds.length} ${L.str_items}`;
-const smartTitle = `${countStr} | ${featureStr}${baseName}`;
+const smartTitle = `${countStr} | ${featureStr}${baseName}${g._sameFolderNeedsReview ? ' | ⚠ 待人工确认' : ''}`;
 
 newDisplay.push({
 id: `grp_${gIdx}`,
@@ -24481,7 +24898,7 @@ for (let idx = 0; idx < sortedGroupData.length; idx++) {
 const { it: item, path: fullPath } = sortedGroupData[idx];
 
 item._dupFullPath = fullPath;
-annotateDupFolderMeta(item, dupFolderMetaMap);
+annotateDupFolderMeta(item, dupFolderMetaMap, visualDupFolderDuplicateCountMap);
 if (idx > 0 && fullPath === lastFullPath) {
 item._isSameFolder = true;
 }
@@ -32299,6 +32716,56 @@ if (S.linkBookmarkMode) renderLinkBookmarkPanel();
 window.addEventListener('resize', scheduleLinkBookmarkResizeRender, true);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleLinkBookmarkResizeRender, { passive: true });
 
+// 4.6.43: result tables can resize columns by dragging the header separator.
+// Widths are local UI preferences (localStorage), so they survive refresh/restart but
+// do not enter cloud config. Double-click a separator to restore the default width.
+const PK_RESULT_COL_WIDTHS_KEY = 'pk_result_column_widths_v1';
+const getResultColumnResizeContext = () => {
+    const cur=S.path&&S.path.length?S.path[S.path.length-1]:{};
+    if(S.dupMode)return `dup:${S.dupGroupView==='folders'?'folders':'files'}`;
+    if(S.analyzeMode&&cur&&cur.id==='analyze_root')return 'analyze';
+    if(cur&&cur.id==='virtual_search_root')return 'search';
+    if(S.isFlattened)return 'flatten';
+    if(S.historyMode)return 'history'; if(S.recentMode)return 'recent';
+    if(S.offlineMode)return 'offline'; if(S.uploadMode)return 'upload';
+    if(S.shareMode)return 'share'; if(S.shareParseMode&&S.shareParseInsightMode)return 'share-insight';
+    if(S.search)return 'filtered';
+    return '';
+};
+const readResultColumnWidths = ctx => {
+    if(!ctx)return {};
+    try { const all=JSON.parse(localStorage.getItem(PK_RESULT_COL_WIDTHS_KEY)||'{}'); return all&&typeof all==='object'&&all[ctx]&&typeof all[ctx]==='object'?all[ctx]:{}; } catch(e){ return {}; }
+};
+const writeResultColumnWidth = (ctx,key,width) => {
+    if(!ctx||!key)return;
+    try { const all=JSON.parse(localStorage.getItem(PK_RESULT_COL_WIDTHS_KEY)||'{}'); const out=all&&typeof all==='object'?all:{}; if(!out[ctx])out[ctx]={}; if(width==null)delete out[ctx][key]; else out[ctx][key]=Math.round(width); localStorage.setItem(PK_RESULT_COL_WIDTHS_KEY,JSON.stringify(out)); } catch(e){}
+};
+const applyResultColumnWidthPrefs = (hd, baseTemplate) => {
+    const ctx=getResultColumnResizeContext(); if(!ctx||!hd||!baseTemplate)return baseTemplate;
+    const visible=Array.from(hd.querySelectorAll(':scope > .pk-col')).filter(c=>c.style.display!=='none');
+    const parts=String(baseTemplate).trim().split(/\s+/); if(parts.length!==visible.length+1)return baseTemplate;
+    const prefs=readResultColumnWidths(ctx); let changed=false;
+    visible.forEach((c,i)=>{const w=Number(prefs[c.dataset.k]);if(Number.isFinite(w)&&w>=48){parts[i+1]=`${Math.round(w)}px`;changed=true;}});
+    return changed?parts.join(' '):baseTemplate;
+};
+const bindResultHeaderColumnResize = (hd, template) => {
+    const ctx=getResultColumnResizeContext(); if(!ctx||!hd||isGridView())return;
+    const visible=Array.from(hd.querySelectorAll(':scope > .pk-col')).filter(c=>c.style.display!=='none');
+    visible.forEach(col=>{
+        let handle=col.querySelector(':scope > .pk-col-resize');
+        if(!handle){handle=document.createElement('span');handle.className='pk-col-resize';Object.assign(handle.style,{position:'absolute',right:'-4px',top:'4px',bottom:'4px',width:'8px',cursor:'col-resize',zIndex:'9',borderRight:'1px solid transparent'});col.style.position='relative';col.appendChild(handle);}
+        handle.onmouseenter=()=>handle.style.borderRightColor='var(--pk-pri)'; handle.onmouseleave=()=>handle.style.borderRightColor='transparent';
+        handle.ondblclick=e=>{e.preventDefault();e.stopPropagation();writeResultColumnWidth(ctx,col.dataset.k,null);renderList();};
+        handle.onmousedown=e=>{
+            if(e.button!==0)return;e.preventDefault();e.stopPropagation();
+            const startX=e.clientX,startW=Math.max(48,col.getBoundingClientRect().width); const key=col.dataset.k;
+            const move=ev=>{const w=Math.max(48,Math.min(900,startW+ev.clientX-startX));writeResultColumnWidth(ctx,key,w);const current=applyResultColumnWidthPrefs(hd,template);hd.style.gridTemplateColumns=current;UI.in.querySelectorAll('.pk-row').forEach(r=>{if(!r.classList.contains('pk-group-hd'))r.style.gridTemplateColumns=current;});};
+            const up=()=>{document.removeEventListener('mousemove',move,true);document.removeEventListener('mouseup',up,true);requestAnimationFrame(()=>{if(getResultColumnResizeContext()===ctx)renderList();});};
+            document.addEventListener('mousemove',move,true);document.addEventListener('mouseup',up,true);
+        };
+    });
+};
+
 function renderList() {
 if (S.linkBookmarkMode) {
 if (UI.win) UI.win.classList.remove('pk-share-parse-mode', 'pk-share-parse-root-mode');
@@ -32671,6 +33138,11 @@ dateHeader.childNodes[0].textContent = S.trashMode ? L.col_remaining : L.col_dat
 }
 }
 
+if (!isGridView() && hd) {
+    colDef = applyResultColumnWidthPrefs(hd, colDef);
+    hd.style.gridTemplateColumns = colDef;
+    bindResultHeaderColumnResize(hd, colDef);
+}
 const currentCols = isGridView() ? [] : hd.querySelectorAll('.pk-col');
 
 currentCols.forEach(c => {
@@ -32708,7 +33180,16 @@ if (!groupSortable) {
         c.style.color = active ? 'var(--pk-pri)' : '';
     }
 }
-} else if (S.dupMode || S.offlineMode || S.uploadMode || isIllegalContextSort) {
+} else if (S.dupMode) {
+const k=c.dataset.k, ok=DUP_RESULT_SORT_KEYS.has(k);
+if(!ok){c.style.cursor='default';c.style.pointerEvents='none';c.style.color='var(--pk-fg)';if(span)span.textContent='';}
+else {
+    c.style.cursor='pointer';c.style.pointerEvents='auto';
+    c.onclick=()=>applyDupResultSortSelection(k);
+    const active=S.dupResultSortKey===k; if(span)span.textContent=active?(S.dupResultSortDir===1?' ▼':' ▲'):'';
+    c.style.color=active?'var(--pk-pri)':'';
+}
+} else if (S.offlineMode || S.uploadMode || isIllegalContextSort) {
 c.style.cursor = 'default';
 c.style.pointerEvents = 'none';
 c.style.color = 'var(--pk-fg)';
@@ -32771,6 +33252,90 @@ if (UI.win) UI.win.classList.remove('pk-view-switching');
 });
 }
 });
+}
+
+
+// 4.6.49: duplicate-result context-menu quick selection.  Select items under the
+// clicked path only when the same duplicate group also has at least one copy outside
+// that path.  The whole visible duplicate group is inspected, so filters remain the
+// action boundary instead of silently touching hidden groups.
+function dupQuickScopeNormalizePath(raw) {
+let value = String(raw || '').replace(/\\/g, '/').replace(/\/{2,}/g, '/').trim();
+value = value.replace(/^\/+|\/+$/g, '');
+const homeText = String((typeof L !== 'undefined' && L && L.btn_nav_home) || '').replace(/^\/+|\/+$/g, '');
+if (homeText) {
+    if (value === homeText) value = '';
+    else if (value.startsWith(homeText + '/')) value = value.substring(homeText.length + 1);
+}
+return value.replace(/^\/+|\/+$/g, '');
+}
+
+function dupQuickScopePathForItem(item) {
+if (!item) return '';
+const direct = String(item._dupFullPath || item._cachedPath || item._pathStr || item.path || '').trim();
+if (direct) return dupQuickScopeNormalizePath(direct);
+if (Array.isArray(item._lineage) && item._lineage.length) {
+    return dupQuickScopeNormalizePath(item._lineage.map(node => node && node.name || '').filter(Boolean).join('/'));
+}
+return '';
+}
+
+function selectDupItemsUnderCurrentPathWithOutside(baseItem) {
+if (!S.dupMode || !baseItem) return { selectedIds: [], groupHits: 0, targetPath: '' };
+const targetPath = dupQuickScopePathForItem(baseItem);
+const targetKey = targetPath.toLocaleLowerCase();
+const itemMap = S.dupItemMap instanceof Map ? S.dupItemMap : S.itemMap;
+const groups = [];
+const groupSeen = new Set();
+
+// Respect the current filtered result list. Every visible duplicate header carries
+// its real groupIds, including visual-dedupe groups.
+(Array.isArray(S.display) ? S.display : []).forEach(row => {
+    if (!row || !row.isHeader || !Array.isArray(row.groupIds) || row.groupIds.length < 2) return;
+    const key = row.groupIds.map(String).sort().join('\u0000');
+    if (groupSeen.has(key)) return;
+    groupSeen.add(key);
+    groups.push(row.groupIds.slice());
+});
+if (!groups.length && Array.isArray(S.dupRawGroups)) {
+    S.dupRawGroups.forEach(g => {
+        if (!g || !Array.isArray(g.ids) || g.ids.length < 2) return;
+        const key = g.ids.map(String).sort().join('\u0000');
+        if (groupSeen.has(key)) return;
+        groupSeen.add(key);
+        groups.push(g.ids.slice());
+    });
+}
+
+const isInside = item => {
+    const candidate = dupQuickScopePathForItem(item).toLocaleLowerCase();
+    if (!targetKey) return candidate === '';
+    return candidate === targetKey || candidate.startsWith(targetKey + '/');
+};
+const selectedIds = [];
+const selectedSeen = new Set();
+let groupHits = 0;
+groups.forEach(ids => {
+    const members = ids.map(id => itemMap && itemMap.get(id)).filter(Boolean);
+    if (members.length < 2) return;
+    const inside = members.filter(isInside);
+    const outside = members.filter(item => !isInside(item));
+    if (!inside.length || !outside.length) return;
+    groupHits++;
+    inside.forEach(item => {
+        const id = String(item && item.id || '');
+        if (!id || selectedSeen.has(id)) return;
+        selectedSeen.add(id);
+        selectedIds.push(item.id);
+    });
+});
+if (selectedIds.length) {
+    S.setExplicitSelection(selectedIds);
+    if (typeof renderDupView === 'function') renderDupView();
+    else renderVisible();
+    updateStat();
+}
+return { selectedIds, groupHits, targetPath };
 }
 
 function renderVisible() {
@@ -33032,6 +33597,15 @@ colDef = "36px 30px 2fr 1fr 80px 130px";
 colDef = "36px 30px 2fr 1fr 80px 120px 130px";
 } else {
 colDef = "36px 30px 1fr 80px 120px 130px";
+}
+
+// 4.6.47: body rows must use the exact same resized template as the header.
+// Previously only renderList() applied the saved widths; renderVisible() rebuilt
+// every row with the base template, so dragging e.g. Path visually moved only the
+// header and the body snapped back on the next virtual-row render.
+if (!isGridMode) {
+    const liveHeader = UI.win && UI.win.querySelector ? UI.win.querySelector('.pk-grid-hd') : null;
+    if (liveHeader) colDef = applyResultColumnWidthPrefs(liveHeader, colDef);
 }
 
 UI.pop.style.display = 'none';
@@ -33856,7 +34430,8 @@ const targetState = grpChk.checked;
 groupItemIds.forEach(id => {
     S.setSelected(id, targetState);
 });
-renderVisible();
+if (S.dupMode && S.dupSelectedGroupsOnly) renderDupView();
+else renderVisible();
 updateStat();
 };
 }
@@ -34225,7 +34800,9 @@ if (count !== undefined && count !== null && count !== '') {
 }
 }
 
-const displayFolderCount = folderItemCount === null ? '' : L.grid_folder_count.replace('{n}', folderItemCount);
+const displayFolderCount = (d._dupFolderStatsRow && d._dupFolderDuplicateCount != null && d._dupFolderTotalCount != null)
+? `${Math.max(0, Number(d._dupFolderDuplicateCount) || 0)}/${Math.max(0, Number(d._dupFolderTotalCount) || 0)} 文件`
+: (folderItemCount === null ? '' : L.grid_folder_count.replace('{n}', folderItemCount));
 const hasThumb = !!(d.thumbnail_link && d.thumbnail_link !== d.icon_link);
 
 
@@ -34295,11 +34872,12 @@ html = `
             <div class="pk-name-main">
                 <span class="pk-name-txt">${nameDisplay}</span>
                 ${(S.visualDupMode && d._visualWatermark) ? `<span class="pk-force-tip" data-pk-tip="${esc(`疑似水印 · ${d._visualWatermarkRegion || '局部叠加'} · 置信 ${(Math.max(0, Math.min(1, Number(d._visualWatermarkScore) || 0)) * 100).toFixed(0)}%`)}" style="margin-left:5px;padding:1px 5px;border-radius:999px;font-size:9px;line-height:15px;white-space:nowrap;color:#b45309;background:rgba(250,173,20,.13);">水印?</span>` : ''}
+                ${d._sameFolderReviewKeeper ? `<span class="pk-force-tip" data-pk-tip="同夹多余自动规则最终保留的是疑似水印副本，请人工确认" style="margin-left:4px;padding:1px 5px;border-radius:999px;font-size:9px;line-height:15px;white-space:nowrap;color:#b91c1c;background:rgba(239,68,68,.10);">待确认</span>` : ''}
                 ${isProtected ? `<span class="pk-tag-default">${L.tag_default}</span>` : ''}
             </div>
         </div>
         ${metaHtml}
-        ${d._dupFolderStatsRow && d._dupFolderStatsText ? `<div class="pk-force-tip" data-pk-tip="${esc(d._dupFolderStatsText)}" style="margin-top:2px;font-size:10px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--pk-pri);opacity:.82;">${esc(d._dupFolderStatsText)}</div>` : ''}
+        ${d._dupFolderStatsRow && d._dupFolderStatsText ? `<div class="pk-force-tip" data-pk-tip="${esc(d._dupFolderRelationText || d._dupFolderStatsText)}" style="margin-top:2px;font-size:10px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${d._dupFolderRelationVisual ? 'var(--pk-fg)' : 'var(--pk-pri)'};opacity:${d._dupFolderRelationVisual ? '.76' : '.82'};">${esc(d._dupFolderStatsText)}</div>` : ''}
         ${(S.analyzeMode && S.analyzeSimGroups && d._containRoleText) ? `<div class="pk-force-tip" data-pk-tip="${esc(d._containRoleDetailText || d._containRoleText)}" style="margin-top:3px;font-size:10px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${d._containRole === 'target' ? 'var(--pk-pri)' : 'var(--pk-fg)'};opacity:${d._containRole === 'target' ? '1' : '.72'};">${esc(d._containRoleText)}</div>` : ''}
         ${containChildCoverageItems.length ? `<div class="pk-force-tip" data-pk-tip="${esc(containChildTip)}" style="margin-top:2px;font-size:10px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--pk-pri);opacity:.78;">${esc(`子目录：${containChildSummary}`)}</div>` : ''}
     </div>
@@ -34587,12 +35165,15 @@ const containChildBadge = containChildItems.length
 ? `<span class="pk-force-tip" data-pk-tip="${esc(containChildTipInline)}" style="margin-left:7px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:16px;color:var(--pk-pri);opacity:.78;">${esc(`子目录：${containChildSummaryInline}`)}</span>`
 : '';
 const dupFolderStatsBadge = d._dupFolderStatsRow && d._dupFolderStatsText
-? `<span class="pk-force-tip" data-pk-tip="${esc(d._dupFolderStatsText)}" style="margin-left:7px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:16px;color:var(--pk-pri);opacity:.84;">${esc(d._dupFolderStatsText)}</span>`
+? `<span class="pk-force-tip" data-pk-tip="${esc(d._dupFolderRelationText || d._dupFolderStatsText)}" style="margin-left:7px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:16px;color:${d._dupFolderRelationVisual ? 'var(--pk-fg)' : 'var(--pk-pri)'};opacity:${d._dupFolderRelationVisual ? '.76' : '.84'};">${esc(d._dupFolderStatsText)}</span>`
 : '';
 const visualWatermarkBadge = (S.visualDupMode && d._visualWatermark)
 ? `<span class="pk-force-tip" data-pk-tip="${esc(`疑似水印 · ${d._visualWatermarkRegion || '局部叠加'} · 置信 ${(Math.max(0, Math.min(1, Number(d._visualWatermarkScore) || 0)) * 100).toFixed(0)}%`)}" style="margin-left:7px;padding:1px 6px;border-radius:999px;font-size:10px;line-height:16px;white-space:nowrap;flex-shrink:0;color:#b45309;background:rgba(250,173,20,.13);">水印?</span>`
 : '';
-html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${nameTip}" style="${isProtected ? 'opacity:1;' : ''}">${getDynamicIcon(d)}<span class="pk-name-txt">${nameDisplay}</span>${visualWatermarkBadge}${dupFolderStatsBadge}${containRoleBadge}${containChildBadge}${isProtected ? `<span class="pk-tag-default">${L.tag_default}</span>` : ''}</div>`;
+const sameFolderReviewBadge = d._sameFolderReviewKeeper
+? `<span class="pk-force-tip" data-pk-tip="同夹多余自动规则最终保留的是疑似水印副本，请人工确认" style="margin-left:6px;padding:1px 6px;border-radius:999px;font-size:10px;line-height:16px;white-space:nowrap;flex-shrink:0;color:#b91c1c;background:rgba(239,68,68,.10);">待确认</span>`
+: '';
+html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${nameTip}" style="${isProtected ? 'opacity:1;' : ''}">${getDynamicIcon(d)}<span class="pk-name-txt">${nameDisplay}</span>${visualWatermarkBadge}${sameFolderReviewBadge}${dupFolderStatsBadge}${containRoleBadge}${containChildBadge}${isProtected ? `<span class="pk-tag-default">${L.tag_default}</span>` : ''}</div>`;
 
 if (showPathCol) {
 let pathHtml = '';
@@ -35242,7 +35823,8 @@ if (d._dupFolderStatsRow && Array.isArray(d._dupFolderStatsFileIds)) {
     if (e.target === chk) {
         const targetState = !!chk.checked;
         statIds.forEach(id => S.setSelected(id, targetState));
-        renderVisible();
+        if (S.dupMode && S.dupSelectedGroupsOnly) renderDupView();
+        else renderVisible();
         updateStat();
         return;
     }
@@ -35330,6 +35912,12 @@ S.activeId = null;
 }
 
 S.lastSelIdx = i;
+
+if (S.dupMode && S.dupSelectedGroupsOnly) {
+    renderDupView();
+    updateStat();
+    return;
+}
 
 const selectedCountForClick = isGridView() ? S.getSelectedCount() : -1;
 const rows = UI.in.children;
@@ -35498,18 +36086,13 @@ else if (!S.offlineMode && !S.uploadMode && isTxtFileLike(d)) {
 
 row.oncontextmenu = (e) => {
 e.preventDefault();
-if (d._dupFolderStatsRow) {
-    e.stopPropagation();
-    showToast('文件夹统计视图用于汇总；点击目录可返回重复组并定位该目录', 'success', 3000);
-    return;
-}
 
 if ((S.shareParseMode || d._isShareItem) && !(S.shareParseMode && d._isShareItem && S.shareParseListActive)) {
 if (UI.ctx) UI.ctx.style.display = 'none';
 return;
 }
 
-if (!S.isSelected(d.id)) {
+if (!S.dupMode && !S.isSelected(d.id)) {
 S.setAllSelection(false);
 S.setSelected(d.id, true);
 S.activeId = d.id;
@@ -35538,7 +36121,8 @@ delF: UI.ctx.querySelector('#ctx-del-forever'),
 shCancel: UI.ctx.querySelector('#ctx-share-cancel'),
 shDetail: UI.ctx.querySelector('#ctx-share-detail'),
 shCopy: UI.ctx.querySelector('#ctx-share-copy'),
-taskRetry: UI.ctx.querySelector('#ctx-task-retry')
+taskRetry: UI.ctx.querySelector('#ctx-task-retry'),
+dupScopeCurrent: UI.ctx.querySelector('#ctx-dup-scope-current')
 };
 const seps = Array.from(UI.ctx.querySelectorAll('.pk-ctx-sep'));
 
@@ -35565,6 +36149,29 @@ sBtn.className = 'pk-ctx-item'; sBtn.id = 'ctx-up-start';
 sBtn.innerHTML = `${CONF.icons.taskStart} ${L.btn_up_start}`;
 const delRef = document.getElementById('ctx-del');
 if (delRef) delRef.parentNode.insertBefore(sBtn, delRef);
+}
+
+// In duplicate results, context selection is based on the right-clicked path,
+// rather than the current multi-selection. Nothing is deleted by these actions.
+let dupPathInside = UI.ctx.querySelector('#ctx-dup-path-inside');
+let dupPathOutside = UI.ctx.querySelector('#ctx-dup-path-outside');
+if (!dupPathInside || !dupPathOutside) {
+    dupPathInside = document.createElement('div');
+    dupPathInside.className = 'pk-ctx-item';
+    dupPathInside.id = 'ctx-dup-path-inside';
+    dupPathOutside = document.createElement('div');
+    dupPathOutside.className = 'pk-ctx-item';
+    dupPathOutside.id = 'ctx-dup-path-outside';
+    UI.ctx.appendChild(dupPathInside);
+    UI.ctx.appendChild(dupPathOutside);
+}
+const dupCtxPath = d._dupFolderStatsRow ? d._dupFolderStatsPath : d._dupFullPath;
+const isDupContext = S.dupMode && typeof dupCtxPath === 'string';
+if (isDupContext) {
+    dupPathInside.textContent = '选择此路径中相同的文件';
+    dupPathOutside.textContent = '选择其他路径中相同的文件';
+    dupPathInside.onclick = (event) => { event.stopPropagation(); UI.ctx.style.display = 'none'; selectDupFilesByContextPath(dupCtxPath, true); };
+    dupPathOutside.onclick = (event) => { event.stopPropagation(); UI.ctx.style.display = 'none'; selectDupFilesByContextPath(dupCtxPath, false); };
 }
 
 const allCtxItems = UI.ctx.querySelectorAll('.pk-ctx-item');
@@ -35937,6 +36544,20 @@ if (S.trashMode) {
     if(seps[1]) seps[1].style.display = hasGroup2 ? 'block' : 'none';
 
     [itms.down, itms.cpName].forEach(el => { if(el) el.style.display = 'flex'; });
+    if (itms.dupScopeCurrent) {
+        itms.dupScopeCurrent.style.display = S.dupMode ? 'flex' : 'none';
+        itms.dupScopeCurrent.onclick = S.dupMode ? (evt) => {
+            evt.preventDefault(); evt.stopPropagation();
+            UI.ctx.style.display = 'none';
+            const result = selectDupItemsUnderCurrentPathWithOutside(d);
+            if (!result.selectedIds.length) {
+                showToast('当前路径下没有“在其他路径也存在相同副本”的项目', 'warning', 4200);
+            } else {
+                const pathLabel = result.targetPath || L.btn_nav_home;
+                showToast(`已在 ${pathLabel} 下从 ${result.groupHits} 个重复组勾选 ${result.selectedIds.length} 项`, 'success', 4200);
+            }
+        } : null;
+    }
 
     if (S.historyMode) {
         if(seps[2]) seps[2].style.display = 'none';
@@ -35972,6 +36593,10 @@ if (S.trashMode) {
     }
     if (itms.del) itms.del.style.display = 'flex';
 }
+}
+if (isDupContext) {
+    dupPathInside.style.display = 'flex';
+    dupPathOutside.style.display = 'flex';
 }
 const useFlexOrder = S.offlineMode || S.uploadMode;
 UI.ctx.style.display = useFlexOrder ? 'flex' : 'block';
@@ -36697,9 +37322,9 @@ return [...movedTargetItems, ...list.filter(file => !movedIds.has(String(file.id
 }, targetFallback);
 if (!patchedTarget || returnedFiles.length < successItems.length) transferRevalidateIds.add(normalizeRealFolderId(targetPid));
 
-if (typeof pkState !== 'undefined' && pkState && pkState.lastGlobalResults) {
-pkState.lastGlobalResults = pkState.lastGlobalResults.filter(x => !movedSet.has(x.id));
-}
+// Keep search/dedupe result rows alive and update their path immediately.
+// A move changes location, not the identity of the matching/search result.
+patchLiveResultStateAfterMove(successItems, targetPid, targetNameForLog || '');
 } else {
 const targetFallback = isNormalHomeFolderContext(targetPid) ? S.items : null;
 const patchedTarget = returnedFiles.length ? patchRealFolderCaches(targetPid, list => {
@@ -36800,6 +37425,7 @@ if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume();
 if (skippedTransferCount > 0) showToast(L.msg_clip_missing_skipped.replace('{n}', skippedTransferCount), 'warning');
 else showToast(opType === 'move' ? L.msg_move_done : L.msg_copy_success);
 transferCompleted = true;
+if (opType === 'move') syncCurrentResultAfterMutation();
 
 } catch (e) {
 showToast(`${L.str_error}: ${formatCloudErrorMessage(e)}`, 'error');
@@ -38591,6 +39217,7 @@ return getLiveManualRefreshStatSuffix() || ((S.pagingLoading || isShareParsePagi
 }
 
 function updateStat() {
+if (UI && UI.win) UI.win.classList.toggle('pk-dup-toolbar-wrap', !!S.dupMode);
 syncLocalUploadVisibility();
 syncRefreshButtonVisibility();
 syncGlobalSearchCheckboxState();
@@ -47801,53 +48428,31 @@ S.scanning = true;
 syncLocalUploadVisibility();
 
 try {
-let skipRecursiveWalk = false;
-if (window.pkGlobalIndex) {
-if (isPartialScan) {
-await window.pkGlobalIndex.ensureScope(rootNodes, {
-signal,
-background: false,
-requireComplete: true,
-onProgress: progress => updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, scanIndexProgressOptions))
-});
+if (window.pkAnalysisCatalog) {
+    if (isSyncOnly && !isPartialScan) {
+        const snapshot = await window.pkAnalysisCatalog.ensureFull({
+            signal, background: false,
+            onProgress: progress => updateLoadTxt(formatIndexProgress(progress, scanIndexProgressOptions))
+        });
+        processedFolders = snapshot ? snapshot.folderCount : 0;
+    } else {
+        const directItems = isPartialScan ? specificTargets.filter(item => item && item.kind !== 'drive#folder') : [];
+        const collected = await window.pkAnalysisCatalog.collectScopeFiles(rootNodes, directItems, {
+            signal, background: false, requireComplete: true,
+            onProgress: progress => updateLoadTxt(formatIndexProgress(progress, scanIndexProgressOptions))
+        });
+        processedFolders = collected.snapshot ? collected.snapshot.folderCount : 0;
+        if (!isSyncOnly) collected.files.forEach(file => fileMap.set(String(file.id), file));
+        updateLoadTxt(formatIndexProgress({ folders: processedFolders, files: fileMap.size, fromCatalog: true }, scanIndexProgressOptions));
+    }
 } else {
-const fullIndexResult = await window.pkGlobalIndex.ensureFull({
-signal,
-background: false,
-onProgress: progress => {
-updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, scanIndexProgressOptions));
+    await coreRecursiveEngine(rootNodes, {
+        signal: signal,
+        onFile: (f, parent) => { if (!isSyncOnly) { f._lineage = parent.lineage ||[]; fileMap.set(f.id, f); } },
+        onFolder: (folder, filesInFolder) => { processedFolders++; indexParents(folder.id, folder.name, filesInFolder); if (typeof globalLineageMap !== 'undefined') globalLineageMap.set(folder.id, folder.lineage); },
+        onProgress: st => updateLoadTxt(formatIndexProgress({ ...st, files: fileMap.size }, scanIndexProgressOptions))
+    });
 }
-});
-if (!fullIndexResult || fullIndexResult.status !== 'ready') {
-const error = new Error('GLOBAL_INDEX_INCOMPLETE');
-error.code = 'GLOBAL_INDEX_INCOMPLETE';
-throw error;
-}
-processedFolders = fullIndexResult.completed || 0;
-skipRecursiveWalk = isSyncOnly;
-}
-}
-
-if (!skipRecursiveWalk) await coreRecursiveEngine(rootNodes, {
-signal: signal,
-onFile: (f, parent) => {
-if (!isSyncOnly) {
-f._lineage = parent.lineage ||[];
-fileMap.set(f.id, f);
-}
-},
-onFolder: (folder, filesInFolder) => {
-processedFolders++;
-indexParents(folder.id, folder.name, filesInFolder);
-
-if (typeof globalLineageMap !== 'undefined') {
-globalLineageMap.set(folder.id, folder.lineage);
-}
-},
-onProgress: (st) => {
-updateLoadTxt(formatIndexProgress({ ...st, files: fileMap.size }, scanIndexProgressOptions));
-}
-});
 
 if (S.scanning && !signal.aborted && myScanId === S.scanId) {
 const didBuildFullGlobalIndex = isSyncOnly && !isPartialScan;
@@ -48355,45 +48960,23 @@ setLoad(false);
 };
 
 try {
-if (window.pkGlobalIndex) {
-const indexResult = isPartialScan
-? await window.pkGlobalIndex.ensureScope(rootNodes, {
-signal,
-background: false,
-requireComplete: true,
-onProgress: progress => updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, duplicateIndexProgressOptions))
-})
-: await window.pkGlobalIndex.ensureFull({
-signal,
-background: false,
-onProgress: progress => updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, duplicateIndexProgressOptions))
-});
-if (!indexResult || indexResult.status !== 'ready') {
-const error = new Error('GLOBAL_INDEX_INCOMPLETE');
-error.code = 'GLOBAL_INDEX_INCOMPLETE';
-throw error;
+if (window.pkAnalysisCatalog) {
+    const directItems = isPartialScan ? selectedTargets.filter(item => item && item.kind !== 'drive#folder') : [];
+    const collected = await window.pkAnalysisCatalog.collectScopeFiles(rootNodes, directItems, {
+        signal, background: false, requireComplete: true,
+        onProgress: progress => updateLoadTxt(formatIndexProgress(progress, duplicateIndexProgressOptions))
+    });
+    processedFolders = collected.snapshot ? collected.snapshot.folderCount : 0;
+    collected.files.forEach(file => fileMap.set(String(file.id), file));
+    updateLoadTxt(formatIndexProgress({ folders: processedFolders, files: fileMap.size, fromCatalog: true }, duplicateIndexProgressOptions));
+} else {
+    await coreRecursiveEngine(rootNodes, {
+        signal: signal,
+        onFile: (f, parent) => { f._lineage = parent.lineage ||[]; fileMap.set(f.id, f); },
+        onFolder: (folder, filesInFolder) => { processedFolders++; indexParents(folder.id, folder.name, filesInFolder); if (typeof globalLineageMap !== 'undefined') globalLineageMap.set(folder.id, folder.lineage); },
+        onProgress: st => updateLoadTxt(formatIndexProgress({ ...st, files: fileMap.size }, duplicateIndexProgressOptions))
+    });
 }
-}
-await coreRecursiveEngine(rootNodes, {
-signal: signal,
-onFile: (f, parent) => {
-    f._lineage = parent.lineage ||[];
-    fileMap.set(f.id, f);
-},
-onFolder: (folder, filesInFolder) => {
-    processedFolders++;
-    if (typeof globalCache !== 'undefined' && !globalCache.has(folder.id)) {
-        globalCache.set(folder.id, [...filesInFolder]);
-    }
-    indexParents(folder.id, folder.name, filesInFolder);
-    if (typeof globalLineageMap !== 'undefined') {
-        globalLineageMap.set(folder.id, folder.lineage);
-    }
-},
-onProgress: (st) => {
-    updateLoadTxt(formatIndexProgress({ ...st, files: fileMap.size }, duplicateIndexProgressOptions));
-}
-});
 
 if (S.scanning && !signal.aborted && myScanId === S.scanId) {
 updateLoadTxt(L.str_merging);
@@ -48470,6 +49053,8 @@ rememberLastRealHomePath();
 
 S.visualDupMode = false;
 S.visualDupConfig = null;
+S.dupSelectedGroupsOnly = false;
+if (UI.chkDupSelectedOnly) UI.chkDupSelectedOnly.checked = false;
 S.dupGroupView = 'files';
 S.dupMode = true;
 S.dupFolderMetaCache = null;
@@ -48523,6 +49108,133 @@ scheduleBackgroundResume();
 }
 };
 };
+
+if (UI.btnFullIndex) {
+UI.btnFullIndex.onclick = async e => {
+    e.preventDefault(); e.stopPropagation();
+    if (!window.pkGlobalIndex || S.scanning || S.loading) return;
+    try {
+        const force = !!e.shiftKey;
+        if (force && window.pkGlobalIndex.isReady()) {
+            const ok = await showConfirm(L.msg_full_index_rebuild_confirm || '当前全盘索引已经完整。是否强制重新建立全盘索引？');
+            if (!ok) return;
+            window.pkGlobalIndex.markAllDirty();
+            if (window.pkAnalysisCatalog) window.pkAnalysisCatalog.invalidate();
+        } else if (window.pkGlobalIndex.isReady()) {
+            const initialDirtyIds = typeof window.pkGlobalIndex.getDirtyIds === 'function' ? window.pkGlobalIndex.getDirtyIds() : [];
+            if (!initialDirtyIds.length) {
+                const snap = window.pkAnalysisCatalog ? window.pkAnalysisCatalog.getFull() : null;
+                const msg = (L.msg_full_index_ready || '全盘索引已就绪：{folders} 个文件夹 · {files} 个文件')
+                    .replace('{folders}', String(snap ? snap.folderCount : 0)).replace('{files}', String(snap ? snap.fileCount : 0));
+                showToast(msg, 'success', 3200); syncFullIndexButton(); return;
+            }
+            S.scanning = true; syncFullIndexButton();
+            setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
+            if (S.scanAbortController) S.scanAbortController.abort();
+            S.scanAbortController = new AbortController();
+            const signal = S.scanAbortController.signal;
+            UI.stopBtn.onclick = () => { if (S.scanAbortController) S.scanAbortController.abort(); updateLoadTxt(L.str_stopping); };
+
+            // 4.6.56: drain the complete dirty cascade in one click.  Verifying a
+            // parent can discover that one or more children changed and mark those
+            // children dirty.  The previous implementation captured getDirtyIds()
+            // only once, so every click handled just one generation of the cascade.
+            const failedIds = new Set();
+            const failedMessages = [];
+            let done = 0;
+            let removed = 0;
+            let rounds = 0;
+            const depthOf = id => {
+                const key = String(id || '');
+                if (!key) return 0;
+                const lineage = typeof globalLineageMap !== 'undefined' ? globalLineageMap.get(key) : null;
+                return Array.isArray(lineage) ? lineage.length : 999999;
+            };
+            while (!signal.aborted) {
+                let dirtyIds = typeof window.pkGlobalIndex.getDirtyIds === 'function' ? window.pkGlobalIndex.getDirtyIds() : [];
+                dirtyIds = Array.from(new Set(dirtyIds.map(id => String(id || ''))))
+                    .filter(id => !failedIds.has(id))
+                    .sort((a, b) => depthOf(a) - depthOf(b) || a.localeCompare(b));
+                if (!dirtyIds.length) break;
+                rounds++;
+                let progressed = false;
+                for (const id of dirtyIds) {
+                    if (signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+                    const pendingBefore = typeof window.pkGlobalIndex.getDirtyCount === 'function' ? window.pkGlobalIndex.getDirtyCount() : dirtyIds.length;
+                    const folderName = id ? (getKnownRealFolderName(id) || id) : (L.btn_nav_home || 'My Pack');
+                    updateLoadTxt(`增量索引：已更新 ${done + removed} · 待更新 ${pendingBefore}\n${folderName}`);
+                    try {
+                        await window.pkGlobalIndex.verifyFolder(id, { force: true, background: false, signal });
+                        done++;
+                        progressed = true;
+                    } catch (error) {
+                        if (signal.aborted || (error && error.name === 'AbortError')) throw error;
+                        const code = String((error && (error.code || error.message)) || '');
+                        // A folder deleted on another client can remain in the old
+                        // persistent tree.  Remove that stale subtree instead of
+                        // leaving an impossible dirty item forever.
+                        if (id && /GLOBAL_INDEX_FOLDER_NOT_FOUND|404|not[ _-]?found/i.test(code)) {
+                            try {
+                                const dropped = typeof window.pkGlobalIndex.dropFolders === 'function' ? window.pkGlobalIndex.dropFolders([id]) : [];
+                                removed += Math.max(1, Array.isArray(dropped) ? dropped.length : 0);
+                                progressed = true;
+                                continue;
+                            } catch (dropError) {}
+                        }
+                        failedIds.add(id);
+                        failedMessages.push(`${folderName}: ${formatCloudErrorMessage(error)}`);
+                    }
+                    if (((done + removed) % 8) === 0) {
+                        syncFullIndexButton();
+                        await sleep(0);
+                    }
+                }
+                const pendingAfter = typeof window.pkGlobalIndex.getDirtyIds === 'function'
+                    ? window.pkGlobalIndex.getDirtyIds().filter(id => !failedIds.has(String(id || ''))).length
+                    : 0;
+                if (!pendingAfter || !progressed) break;
+                // Defensive ceiling only prevents a malformed server tree from
+                // producing an endless parent/child dirty loop.  Normal scans exit
+                // as soon as the dynamic queue reaches zero.
+                if (rounds >= 1000) {
+                    failedMessages.push('增量索引达到安全轮次上限，请稍后重试。');
+                    break;
+                }
+            }
+            if (signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+            if (window.pkAnalysisCatalog) window.pkAnalysisCatalog.invalidate();
+            const remaining = typeof window.pkGlobalIndex.getDirtyCount === 'function' ? window.pkGlobalIndex.getDirtyCount() : 0;
+            syncFullIndexButton();
+            if (failedMessages.length || remaining > 0) {
+                const extra = failedMessages.length ? `；失败 ${failedMessages.length} 个` : '';
+                showToast(`增量索引完成：更新 ${done} 个目录${removed ? ` · 清理 ${removed} 个失效目录` : ''}；仍待更新 ${remaining}${extra}`, 'warning', 5200);
+                if (failedMessages.length) console.warn('[FullIndex] incremental verify failures:', failedMessages);
+            } else {
+                showToast(`增量索引完成：更新 ${done} 个目录${removed ? ` · 清理 ${removed} 个失效目录` : ''} · 待更新 0`, 'success', 3600);
+            }
+            return;
+        }
+        S.scanning = true; syncFullIndexButton();
+        setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
+        if (S.scanAbortController) S.scanAbortController.abort();
+        S.scanAbortController = new AbortController();
+        const signal = S.scanAbortController.signal;
+        UI.stopBtn.onclick = () => { if (S.scanAbortController) S.scanAbortController.abort(); updateLoadTxt(L.str_stopping); };
+        const snap = window.pkAnalysisCatalog
+            ? await window.pkAnalysisCatalog.ensureFull({ signal, background: false, force, onProgress: p => updateLoadTxt(formatIndexProgress(p)) })
+            : (await window.pkGlobalIndex.ensureFull({ signal, background: false, force, onProgress: p => updateLoadTxt(formatIndexProgress(p)) }), null);
+        if (window.pkAnalysisCatalog) window.pkAnalysisCatalog.invalidate();
+        const finalSnap = window.pkAnalysisCatalog ? window.pkAnalysisCatalog.getFull() : snap;
+        const msg = (L.msg_full_index_ready || '全盘索引已就绪：{folders} 个文件夹 · {files} 个文件')
+            .replace('{folders}', String(finalSnap ? finalSnap.folderCount : 0)).replace('{files}', String(finalSnap ? finalSnap.fileCount : 0));
+        showToast(msg, 'success', 4200);
+    } catch (err) {
+        if (!(err && err.name === 'AbortError')) showAlert((L.msg_full_index_failed || '全盘索引失败：{msg}').replace('{msg}', formatCloudErrorMessage(err)));
+    } finally {
+        S.scanning = false; S.scanAbortController = null; setLoad(false); syncFullIndexButton();
+    }
+};
+}
 
 UI.scan.onclick = () => {
     if (isGlobalSearchResultContext()) {
@@ -48607,6 +49319,29 @@ if (UI.chkVisualWatermarkOnly) UI.chkVisualWatermarkOnly.onchange = () => {
     S.visualWatermarkOnly = !!UI.chkVisualWatermarkOnly.checked;
     if (S.dupMode && S.visualDupMode) {
         S.clearSelection();
+        renderDupView();
+        updateStat();
+    }
+};
+if (UI.chkVisualFolderHighCov) UI.chkVisualFolderHighCov.onchange = () => {
+    S.visualFolderHighCoverageOnly = !!UI.chkVisualFolderHighCov.checked;
+    if (S.dupMode && S.visualDupMode && S.dupGroupView === 'folders') {
+        S.clearSelection();
+        renderDupView();
+        updateStat();
+    }
+};
+if (UI.chkDupReviewOnly) UI.chkDupReviewOnly.onchange = () => {
+    S.dupReviewOnly = !!UI.chkDupReviewOnly.checked;
+    if (S.dupMode) {
+        S.clearSelection();
+        renderDupView();
+        updateStat();
+    }
+};
+if (UI.chkDupSelectedOnly) UI.chkDupSelectedOnly.onchange = () => {
+    S.dupSelectedGroupsOnly = !!UI.chkDupSelectedOnly.checked;
+    if (S.dupMode) {
         renderDupView();
         updateStat();
     }
@@ -48701,6 +49436,9 @@ return {
 visualDupMode: !!S.visualDupMode,
 visualDupConfig: S.visualDupConfig ? { ...S.visualDupConfig } : null,
     visualWatermarkOnly: !!S.visualWatermarkOnly,
+    visualFolderHighCoverageOnly: S.visualFolderHighCoverageOnly !== false,
+    dupReviewOnly: !!S.dupReviewOnly,
+    dupSelectedGroupsOnly: !!S.dupSelectedGroupsOnly,
     dupResultSig: S.dupResultSig || '',
     dupFolderMetaCache: S.dupFolderMetaCache || null,
     pinnedDupPath: S.pinnedDupPath || null,
@@ -48849,7 +49587,13 @@ try {
     S.visualDupMode = !!snap.visualDupMode;
     S.visualDupConfig = snap.visualDupConfig ? { ...snap.visualDupConfig } : null;
     S.visualWatermarkOnly = !!snap.visualWatermarkOnly;
+    S.visualFolderHighCoverageOnly = snap.visualFolderHighCoverageOnly !== false;
+    S.dupReviewOnly = !!snap.dupReviewOnly;
+    S.dupSelectedGroupsOnly = !!snap.dupSelectedGroupsOnly;
     if (UI.chkVisualWatermarkOnly) UI.chkVisualWatermarkOnly.checked = !!S.visualWatermarkOnly;
+    if (UI.chkVisualFolderHighCov) UI.chkVisualFolderHighCov.checked = S.visualFolderHighCoverageOnly !== false;
+    if (UI.chkDupReviewOnly) UI.chkDupReviewOnly.checked = !!S.dupReviewOnly;
+    if (UI.chkDupSelectedOnly) UI.chkDupSelectedOnly.checked = !!S.dupSelectedGroupsOnly;
     S.isFlattened = false;
     S.analyzeMode = false;
     S.scanId = snap.scanId;
@@ -49138,7 +49882,8 @@ const pkVisualStdDev = values => {
 const pkVisualPHashWorkerPool = (() => {
     const supported = typeof Worker === 'function' && typeof Blob === 'function' && typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function';
     const hw = Math.max(2, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4) || 4);
-    const desiredSize = Math.max(1, Math.min(6, hw - 1));
+    const autoSize = Math.max(1, Math.min(6, hw - 1));
+    let desiredSize = Math.max(1, Math.min(8, Math.round(Number((typeof gmGet === 'function' ? gmGet('pk_visual_perf_phash_workers', autoSize) : autoSize)) || autoSize)));
     let workerUrl = '';
     let workers = [];
     let queue = [];
@@ -49167,7 +49912,7 @@ self.onmessage=e=>{
     const ensure = () => {
         if (disabled || workers.length) return;
         try {
-            workerUrl = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+            if (!workerUrl) workerUrl = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
             for (let i = 0; i < desiredSize; i++) {
                 const worker = new Worker(workerUrl);
                 const slot = { worker, busy: false, job: null };
@@ -49238,7 +49983,22 @@ self.onmessage=e=>{
             queue.push(job); pump();
         });
     };
-    return { run, get size() { return disabled ? 0 : desiredSize; }, get supported() { return !disabled; } };
+    const configure = size => {
+        const nextSize = Math.max(1, Math.min(8, Math.round(Number(size) || desiredSize || 1)));
+        desiredSize = nextSize;
+        if (disabled) return 0;
+        // Performance settings are applied before a visual run starts, when the
+        // pool is normally idle. If it is busy, keep current workers for the
+        // in-flight jobs and the new target takes effect on the next idle run.
+        if (queue.length || workers.some(slot => slot.busy)) return workers.length || desiredSize;
+        if (workers.length !== desiredSize) {
+            workers.forEach(slot => { try { slot.worker.terminate(); } catch (e) {} });
+            workers = [];
+            ensure();
+        }
+        return workers.length || desiredSize;
+    };
+    return { run, configure, get size() { return disabled ? 0 : desiredSize; }, get supported() { return !disabled; } };
 })();
 
 const pkVisualDctBasis = Array.from({ length: 8 }, (_, u) => {
@@ -49273,6 +50033,7 @@ const pkVisualComputePHashLocal = gray => {
     return { hash, contrast: pkVisualStdDev(gray), worker: false };
 };
 
+// 4.6.50: explicit visual network/decode/hash progress stages.
 const pkVisualBlobFromUrl = async (url, signal = null) => {
     const src = String(url || '').trim();
     if (!src) throw new Error('URL_EMPTY');
@@ -49311,26 +50072,37 @@ const pkVisualBlobFromUrl = async (url, signal = null) => {
     });
 };
 
-const pkVisualLoadDrawable = async (url, signal = null) => {
+const pkVisualLoadDrawable = async (url, signal = null, onStage = null) => {
+    if (onStage) onStage('download_start');
     const blob = await pkVisualBlobFromUrl(url, signal);
+    if (onStage) onStage('download_done');
+    if (onStage) onStage('decode_start');
     if (typeof createImageBitmap === 'function') {
         // Chromium can downscale while creating the bitmap, reducing decode memory
         // before the 32x32 pHash canvas is touched.
-        try { return await createImageBitmap(blob, { resizeWidth: 32, resizeHeight: 32, resizeQuality: 'low' }); } catch (e) {}
-        try { return await createImageBitmap(blob); } catch (e) {}
+        try {
+            const bitmap = await createImageBitmap(blob, { resizeWidth: 32, resizeHeight: 32, resizeQuality: 'low' });
+            if (onStage) onStage('decode_done');
+            return bitmap;
+        } catch (e) {}
+        try {
+            const bitmap = await createImageBitmap(blob);
+            if (onStage) onStage('decode_done');
+            return bitmap;
+        } catch (e) {}
     }
     return await new Promise((resolve, reject) => {
         const objectUrl = URL.createObjectURL(blob);
         const image = new Image();
         const cleanup = () => { try { URL.revokeObjectURL(objectUrl); } catch (e) {} };
-        image.onload = () => { cleanup(); resolve(image); };
+        image.onload = () => { cleanup(); if (onStage) onStage('decode_done'); resolve(image); };
         image.onerror = () => { cleanup(); reject(new Error('IMAGE_DECODE_FAILED')); };
         image.src = objectUrl;
     });
 };
 
-const pkVisualImagePHash = async (url, signal = null) => {
-    const drawable = await pkVisualLoadDrawable(url, signal);
+const pkVisualImagePHash = async (url, signal = null, onStage = null) => {
+    const drawable = await pkVisualLoadDrawable(url, signal, onStage);
     try {
         const canvas = document.createElement('canvas');
         canvas.width = 32; canvas.height = 32;
@@ -49341,20 +50113,24 @@ const pkVisualImagePHash = async (url, signal = null) => {
         const gray = new Float32Array(1024);
         for (let i = 0, p = 0; i < data.length; i += 4, p++) gray[p] = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
         if (signal && signal.aborted) throw new DOMException('Aborted', 'AbortError');
+        if (onStage) onStage('hash_start');
+        let result = null;
         try {
             const workerResult = await pkVisualPHashWorkerPool.run(gray, signal);
-            if (workerResult && workerResult.hash && workerResult.hash.length) return workerResult;
+            if (workerResult && workerResult.hash && workerResult.hash.length) result = workerResult;
         } catch (e) {
             if (e && e.name === 'AbortError') throw e;
             console.warn('[PEM visual] worker pHash fallback:', e);
         }
-        return pkVisualComputePHashLocal(gray);
+        if (!result) result = pkVisualComputePHashLocal(gray);
+        if (onStage) onStage('hash_done');
+        return result;
     } finally {
         if (drawable && typeof drawable.close === 'function') { try { drawable.close(); } catch (e) {} }
     }
 };
 
-const pkVisualResolveDetail = async (item, signal = null) => {
+const pkVisualResolveDetail = async (item, signal = null, options = {}) => {
     if (!item) throw new Error('FILE_MISSING');
     if (item._isShareItem) return await resolveSharePlayableFile(item, { signal });
     const targetApiId = ((S.offlineMode && item.kind === 'drive#task') || (S.uploadMode && item.file_id)) ? (item.file_id || item.id) : item.id;
@@ -49364,7 +50140,8 @@ const pkVisualResolveDetail = async (item, signal = null) => {
             signal,
             isRunning: () => !(signal && signal.aborted),
             attempts: 3,
-            captchaRecoveryScope: 'foreground_visual_duplicate_verify'
+            captchaRecoveryScope: 'foreground_visual_duplicate_verify',
+            thumbnailSize: options.thumbnailSize || undefined
         });
     } catch (e) {
         if (e && e.name === 'AbortError') throw e;
@@ -49551,7 +50328,7 @@ const pkVisualCaptureVideoHashes = async (item, signal, onProgress, label = '视
         for (let i = 0; i < Math.min(candidates.length, 5); i++) {
             if (signal && signal.aborted) throw new DOMException('Aborted', 'AbortError');
             try {
-                if (onProgress) onProgress(`${label}：尝试媒体源 ${i + 1}/${Math.min(candidates.length, 5)}…`);
+                if (onProgress) onProgress(`${label}：网络加载视频流 ${i + 1}/${Math.min(candidates.length, 5)}…`);
                 await loadSource(candidates[i]);
                 loaded = true;
                 break;
@@ -49568,7 +50345,7 @@ const pkVisualCaptureVideoHashes = async (item, signal, onProgress, label = '视
             if (signal && signal.aborted) throw new DOMException('Aborted', 'AbortError');
             const fraction = fractions[i];
             const seconds = Math.max(0.1, Math.min(Math.max(0.1, duration - 0.1), duration * fraction));
-            if (onProgress) onProgress(`${label}：关键帧 ${i + 1}/${fractions.length}（${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}）…`);
+            if (onProgress) onProgress(`${label}：定位并读取关键帧 ${i + 1}/${fractions.length}（${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}）…`);
             try {
                 video.pause();
                 video.currentTime = seconds;
@@ -49956,11 +50733,199 @@ const pkVisualStoredFrameFractions = () => {
 };
 const pkVisualFrameRequiredValid = fractions => Math.max(1, Math.min((fractions || []).length || 1, Math.ceil(((fractions || []).length || 1) * 0.6)));
 const pkVisualFrameFractionKey = fraction => Number(fraction || 0).toFixed(3);
-const pkVisualPreciseVideoConcurrency = () => {
+// 4.6.51: visual performance controls. These values intentionally affect only
+// throughput/candidate breadth; the final visual threshold remains a separate
+// accuracy setting. All values are persisted and can be tuned per machine/network.
+const pkVisualAutoPHashWorkers = () => {
+    const hw = Math.max(2, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4) || 4);
+    return Math.max(1, Math.min(6, hw - 1));
+};
+const pkVisualAutoPreciseConcurrency = () => {
     const hw = Math.max(2, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4) || 4);
     return hw >= 8 ? 3 : 2;
 };
+// 4.6.55: migrate the one release (4.6.53) whose old "brutal" preset also
+// changed accuracy/candidate settings. 4.6.54 redefined brutal as concurrency-only,
+// but the altered GM values persisted across upgrades and could make a later scan
+// legitimately produce zero groups. Detect that exact legacy tuple once, restore
+// the normal accuracy defaults, and KEEP the user's high concurrency values.
+const pkVisualMigrateLegacyBrutalAccuracy = () => {
+    const migrationKey = 'pk_visual_migration_4655_brutal_accuracy';
+    if (gmGet(migrationKey, false)) return false;
+    const near = (key, value) => Math.abs(Number(gmGet(key, NaN)) - Number(value)) < 1e-9;
+    const frameCount = Math.round(Number(gmGet('pk_visual_dup_frame_count', 3)) || 3);
+    const framePos = String(gmGet('pk_visual_dup_frame_positions', '') || '').replace(/[，\s]+/g, ',').replace(/^,+|,+$/g, '');
+    const legacy = near('pk_visual_perf_thumb_concurrency', 16)
+        && near('pk_visual_perf_phash_workers', 8)
+        && near('pk_visual_perf_video_concurrency', 4)
+        && near('pk_visual_perf_candidate_relax', 0)
+        && near('pk_visual_perf_duration_sec', 2)
+        && near('pk_visual_perf_duration_pct', 0.5)
+        && near('pk_visual_perf_thumb_contrast', 3)
+        && near('pk_visual_perf_frame_contrast', 8)
+        && near('pk_visual_perf_watermark_concurrency', 12)
+        && near('pk_visual_perf_watermark_pairs', 5)
+        && gmGet('pk_visual_perf_watermark_enabled', true) === false
+        && frameCount === 1 && framePos === '50';
+    if (legacy) {
+        gmSet('pk_visual_perf_candidate_relax', 8);
+        gmSet('pk_visual_perf_duration_sec', 10);
+        gmSet('pk_visual_perf_duration_pct', 2);
+        gmSet('pk_visual_perf_thumb_contrast', 1);
+        gmSet('pk_visual_perf_frame_contrast', 4);
+        gmSet('pk_visual_perf_watermark_pairs', 60);
+        gmSet('pk_visual_perf_watermark_enabled', true);
+        gmSet('pk_visual_dup_frame_count', 3);
+        gmSet('pk_visual_dup_frame_positions', '20,50,80');
+    }
+    gmSet(migrationKey, true);
+    return legacy;
+};
+pkVisualMigrateLegacyBrutalAccuracy();
+const pkVisualReadPerformanceConfig = () => ({
+    thumbnailConcurrency: Math.max(1, Math.min(16, Math.round(Number(gmGet('pk_visual_perf_thumb_concurrency', 8)) || 8))),
+    phashWorkers: Math.max(1, Math.min(8, Math.round(Number(gmGet('pk_visual_perf_phash_workers', pkVisualAutoPHashWorkers())) || pkVisualAutoPHashWorkers()))),
+    preciseVideoConcurrency: Math.max(1, Math.min(4, Math.round(Number(gmGet('pk_visual_perf_video_concurrency', pkVisualAutoPreciseConcurrency())) || pkVisualAutoPreciseConcurrency()))),
+    candidateRelaxPct: Math.max(0, Math.min(15, Number(gmGet('pk_visual_perf_candidate_relax', 8)) || 0)),
+    durationToleranceSec: Math.max(0, Math.min(120, Number(gmGet('pk_visual_perf_duration_sec', 10)) || 0)),
+    durationTolerancePct: Math.max(0, Math.min(20, Number(gmGet('pk_visual_perf_duration_pct', 2)) || 0)),
+    thumbnailContrastMin: Math.max(0, Math.min(30, Number(gmGet('pk_visual_perf_thumb_contrast', 1)) || 0)),
+    frameContrastMin: Math.max(0, Math.min(40, Number(gmGet('pk_visual_perf_frame_contrast', 4)) || 0)),
+    preferSmallThumbnail: gmGet('pk_visual_perf_small_thumb', true) !== false,
+    watermarkEnabled: gmGet('pk_visual_perf_watermark_enabled', true) !== false,
+    watermarkConcurrency: Math.max(1, Math.min(12, Math.round(Number(gmGet('pk_visual_perf_watermark_concurrency', 4)) || 4))),
+    watermarkPairBudget: Math.max(5, Math.min(300, Math.round(Number(gmGet('pk_visual_perf_watermark_pairs', 60)) || 60)))
+});
+let pkVisualRuntimePerformance = pkVisualReadPerformanceConfig();
+const pkVisualApplyPerformanceConfig = config => {
+    pkVisualRuntimePerformance = { ...pkVisualReadPerformanceConfig(), ...(config || {}) };
+    pkVisualRuntimePerformance.thumbnailConcurrency = Math.max(1, Math.min(16, Math.round(Number(pkVisualRuntimePerformance.thumbnailConcurrency) || 8)));
+    pkVisualRuntimePerformance.phashWorkers = Math.max(1, Math.min(8, Math.round(Number(pkVisualRuntimePerformance.phashWorkers) || pkVisualAutoPHashWorkers())));
+    pkVisualRuntimePerformance.preciseVideoConcurrency = Math.max(1, Math.min(4, Math.round(Number(pkVisualRuntimePerformance.preciseVideoConcurrency) || pkVisualAutoPreciseConcurrency())));
+    pkVisualRuntimePerformance.candidateRelaxPct = Math.max(0, Math.min(15, Number(pkVisualRuntimePerformance.candidateRelaxPct) || 0));
+    pkVisualRuntimePerformance.durationToleranceSec = Math.max(0, Math.min(120, Number(pkVisualRuntimePerformance.durationToleranceSec) || 0));
+    pkVisualRuntimePerformance.durationTolerancePct = Math.max(0, Math.min(20, Number(pkVisualRuntimePerformance.durationTolerancePct) || 0));
+    pkVisualRuntimePerformance.thumbnailContrastMin = Math.max(0, Math.min(30, Number(pkVisualRuntimePerformance.thumbnailContrastMin) || 0));
+    pkVisualRuntimePerformance.frameContrastMin = Math.max(0, Math.min(40, Number(pkVisualRuntimePerformance.frameContrastMin) || 0));
+    pkVisualRuntimePerformance.watermarkConcurrency = Math.max(1, Math.min(12, Math.round(Number(pkVisualRuntimePerformance.watermarkConcurrency) || 4)));
+    pkVisualRuntimePerformance.watermarkPairBudget = Math.max(5, Math.min(300, Math.round(Number(pkVisualRuntimePerformance.watermarkPairBudget) || 60)));
+    pkVisualRuntimePerformance.preferSmallThumbnail = pkVisualRuntimePerformance.preferSmallThumbnail !== false;
+    pkVisualRuntimePerformance.watermarkEnabled = pkVisualRuntimePerformance.watermarkEnabled !== false;
+    if (pkVisualPHashWorkerPool && typeof pkVisualPHashWorkerPool.configure === 'function') pkVisualPHashWorkerPool.configure(pkVisualRuntimePerformance.phashWorkers);
+    return pkVisualRuntimePerformance;
+};
+const pkVisualDurationTolerance = (da, db) => Math.max(
+    Math.max(0, Number(pkVisualRuntimePerformance.durationToleranceSec) || 0),
+    Math.max(0, Number(da) || 0, Number(db) || 0) * (Math.max(0, Number(pkVisualRuntimePerformance.durationTolerancePct) || 0) / 100)
+);
+const pkVisualPreciseVideoConcurrency = () => Math.max(1, Math.min(4, Number(pkVisualRuntimePerformance.preciseVideoConcurrency) || pkVisualAutoPreciseConcurrency()));
 
+// 4.6.52: wall-clock timing statistics for visual dedupe.  Parallel thumbnail
+// work is measured both as real elapsed phase time and as cumulative per-task
+// network/decode/pHash time, so concurrency changes can be evaluated correctly.
+const PK_VISUAL_TIMING_HISTORY_KEY = 'pk_visual_timing_history_v1';
+const pkVisualNow = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
+const pkVisualFormatElapsed = ms => {
+    const n = Math.max(0, Number(ms) || 0);
+    if (n < 1000) return `${Math.round(n)}ms`;
+    if (n < 60000) return `${(n / 1000).toFixed(n < 10000 ? 2 : 1)}s`;
+    const m = Math.floor(n / 60000), sec = Math.round((n - m * 60000) / 1000);
+    return `${m}m${String(sec).padStart(2, '0')}s`;
+};
+const pkVisualTimingStorageKey = () => PK_VISUAL_TIMING_HISTORY_KEY;
+const pkVisualLoadTimingHistory = () => {
+    try {
+        const rows = JSON.parse(localStorage.getItem(pkVisualTimingStorageKey()) || '[]');
+        return Array.isArray(rows) ? rows.filter(Boolean).slice(0, 12) : [];
+    } catch (e) { return []; }
+};
+const pkVisualSaveTimingHistory = rows => {
+    try { localStorage.setItem(pkVisualTimingStorageKey(), JSON.stringify((rows || []).slice(0, 12))); } catch (e) {}
+};
+const pkVisualTimingConfigSnapshot = config => {
+    const perf = (config && config.performance) || {};
+    return {
+        mode: String(config && config.mode || 'thumbnail'), thresholdPct: Number(config && config.thresholdPct || 95),
+        frameCount: Number(config && (config.frameCount || (config.frameFractions || []).length) || 0),
+        framePositionsPct: Array.isArray(config && config.framePositionsPct) ? config.framePositionsPct.slice(0, 5) : [],
+        thumbnailConcurrency: Number(perf.thumbnailConcurrency || 0), phashWorkers: Number(perf.phashWorkers || 0),
+        preciseVideoConcurrency: Number(perf.preciseVideoConcurrency || 0), candidateRelaxPct: Number(perf.candidateRelaxPct || 0),
+        durationToleranceSec: Number(perf.durationToleranceSec || 0), durationTolerancePct: Number(perf.durationTolerancePct || 0),
+        thumbnailContrastMin: Number(perf.thumbnailContrastMin || 0), frameContrastMin: Number(perf.frameContrastMin || 0),
+        watermarkEnabled: perf.watermarkEnabled !== false, watermarkConcurrency: Number(perf.watermarkConcurrency || 0),
+        watermarkPairBudget: Number(perf.watermarkPairBudget || 0), preferSmallThumbnail: perf.preferSmallThumbnail !== false
+    };
+};
+const pkVisualCreateRunTiming = config => ({
+    schema: 1, startedAt: Date.now(), startPerf: pkVisualNow(), totalMs: 0, status: 'running',
+    stages: Object.create(null), counts: Object.create(null), details: Object.create(null), config: pkVisualTimingConfigSnapshot(config)
+});
+const pkVisualTimingMeasure = async (timing, key, fn) => {
+    const start = pkVisualNow();
+    try { return await fn(); }
+    finally { if (timing) timing.stages[key] = (Number(timing.stages[key]) || 0) + (pkVisualNow() - start); }
+};
+const pkVisualTimingMeasureSync = (timing, key, fn) => {
+    const start = pkVisualNow();
+    try { return fn(); }
+    finally { if (timing) timing.stages[key] = (Number(timing.stages[key]) || 0) + (pkVisualNow() - start); }
+};
+const pkVisualTimingStageLabels = {
+    collect: '收集媒体/读取索引', thumbCache: '载入缩略图指纹缓存', imageThumb: '图片缩略图处理', videoThumb: '视频缩略图处理',
+    imageMatch: '图片候选匹配', videoMatch: '视频缩略图匹配', videoCandidate: '视频候选生成', frameCache: '载入关键帧缓存',
+    frameCapture: '加载视频/抽关键帧', frameCompare: '关键帧指纹比对', groupBuild: '生成重复组', watermark: '水印差异分析', render: '结果构建/渲染'
+};
+const pkVisualTimingParamsText = row => {
+    const c = (row && row.config) || {};
+    const frameText = c.mode === 'precise' ? `${c.frameCount || 0}帧@${(c.framePositionsPct || []).join('/') || '-'}%` : '缩略图';
+    return `${frameText} · 下载${c.thumbnailConcurrency || '-'} · Worker${c.phashWorkers || '-'} · 视频${c.preciseVideoConcurrency || '-'}路 · 候选+${c.candidateRelaxPct || 0}%${c.watermarkEnabled ? ` · 水印${c.watermarkConcurrency || '-'}路` : ' · 水印关'}`;
+};
+const pkVisualTimingFinalize = (timing, status = 'done') => {
+    if (!timing || timing._committed) return timing;
+    timing._committed = true; timing.status = status; timing.finishedAt = Date.now(); timing.totalMs = Math.max(0, pkVisualNow() - Number(timing.startPerf || 0));
+    const clean = JSON.parse(JSON.stringify(timing)); delete clean.startPerf; delete clean._committed;
+    const history = pkVisualLoadTimingHistory();
+    history.unshift(clean); pkVisualSaveTimingHistory(history);
+    try { S.visualDupTiming = clean; } catch (e) {}
+    if (typeof UI !== 'undefined' && UI && UI.visualTimingBtn) UI.visualTimingBtn.textContent = `耗时 ${pkVisualFormatElapsed(clean.totalMs)}`;
+    return clean;
+};
+const pkVisualLatestTiming = () => {
+    try { if (S && S.visualDupTiming && S.visualDupTiming.totalMs >= 0) return S.visualDupTiming; } catch (e) {}
+    return pkVisualLoadTimingHistory()[0] || null;
+};
+const pkVisualShowTimingModal = timingArg => {
+    const timing = timingArg || pkVisualLatestTiming();
+    if (!timing) { showToast('还没有视觉去重耗时记录', 'warning', 3000); return; }
+    const stages = timing.stages || {}, total = Math.max(1, Number(timing.totalMs) || 1);
+    const stageRows = Object.keys(pkVisualTimingStageLabels).filter(key => Number(stages[key]) > 0).map(key => {
+        const ms = Number(stages[key]) || 0, pct = Math.min(999, ms / total * 100);
+        return `<tr><td style="padding:7px 8px;border-bottom:1px solid var(--pk-bd);">${esc(pkVisualTimingStageLabels[key])}</td><td style="padding:7px 8px;border-bottom:1px solid var(--pk-bd);text-align:right;font-family:monospace;font-weight:800;">${pkVisualFormatElapsed(ms)}</td><td style="padding:7px 8px;border-bottom:1px solid var(--pk-bd);text-align:right;opacity:.65;">${pct.toFixed(1)}%</td></tr>`;
+    }).join('');
+    const thumbDetail = ['imageThumb','videoThumb'].map(key => {
+        const d = timing.details && timing.details[key]; if (!d) return '';
+        const label = key === 'imageThumb' ? '图片缩略图' : '视频缩略图';
+        return `<div style="padding:8px 10px;border:1px solid var(--pk-bd);border-radius:8px;line-height:1.65;font-size:12px;"><b>${label}</b>：缓存 ${Number(d.cacheHits||0)}/${Number(d.total||0)} · 实际处理 ${Number(d.networkTotal||0)}<br>累计任务：地址解析 ${pkVisualFormatElapsed(d.resolveMs)} · 下载 ${pkVisualFormatElapsed(d.downloadMs)} · 解码 ${pkVisualFormatElapsed(d.decodeMs)} · pHash ${pkVisualFormatElapsed(d.hashMs)}</div>`;
+    }).filter(Boolean).join('');
+    const counts = timing.counts || {};
+    const summary = `媒体 ${Number(counts.media||0)}（图${Number(counts.images||0)} / 视频${Number(counts.videos||0)}） · 候选 ${Number(counts.videoCandidates||0)} · 精确视频 ${Number(counts.preciseVideos||0)} · 结果 ${Number(counts.groups||0)}组`;
+    const history = pkVisualLoadTimingHistory().slice(0, 8);
+    const historyRows = history.map((row, idx) => `<tr style="${idx===0?'background:var(--pk-hl);':''}"><td style="padding:6px 7px;border-bottom:1px solid var(--pk-bd);white-space:nowrap;">${idx===0?'本次':new Date(row.finishedAt||row.startedAt||0).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td><td style="padding:6px 7px;border-bottom:1px solid var(--pk-bd);font-family:monospace;font-weight:800;text-align:right;">${pkVisualFormatElapsed(row.totalMs)}</td><td style="padding:6px 7px;border-bottom:1px solid var(--pk-bd);font-size:11px;">${esc(pkVisualTimingParamsText(row))}</td></tr>`).join('');
+    const m = showModal(`
+<h3 style="border:none;margin:0 0 12px;font-size:18px;font-weight:800;color:var(--pk-fg);">视觉去重耗时统计</h3>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;">
+<div style="padding:9px;border:1px solid var(--pk-bd);border-radius:8px;"><div style="font-size:11px;opacity:.6;">总耗时</div><div style="font-size:21px;font-weight:900;color:var(--pk-pri);">${pkVisualFormatElapsed(timing.totalMs)}</div></div>
+<div style="padding:9px;border:1px solid var(--pk-bd);border-radius:8px;"><div style="font-size:11px;opacity:.6;">模式</div><div style="font-size:13px;font-weight:800;margin-top:4px;">${esc(pkVisualTimingParamsText(timing))}</div></div>
+<div style="padding:9px;border:1px solid var(--pk-bd);border-radius:8px;"><div style="font-size:11px;opacity:.6;">处理量</div><div style="font-size:12px;font-weight:800;margin-top:4px;line-height:1.5;">${esc(summary)}</div></div>
+</div>
+<div style="font-size:11px;opacity:.62;margin-bottom:8px;line-height:1.5;">阶段耗时为真实墙钟时间，可直接衡量并发参数效果；缩略图“累计任务耗时”会因并发而大于墙钟时间，用于判断瓶颈在下载、解码还是 pHash。</div>
+<div style="max-height:280px;overflow:auto;border:1px solid var(--pk-bd);border-radius:8px;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr><th style="padding:7px;text-align:left;">阶段</th><th style="padding:7px;text-align:right;">耗时</th><th style="padding:7px;text-align:right;">占总时间</th></tr></thead><tbody>${stageRows}</tbody></table></div>
+${thumbDetail ? `<div style="display:grid;gap:7px;margin-top:9px;">${thumbDetail}</div>` : ''}
+<div style="margin-top:14px;font-size:12px;font-weight:800;">最近运行对比</div>
+<div style="margin-top:6px;max-height:190px;overflow:auto;border:1px solid var(--pk-bd);border-radius:8px;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><tbody>${historyRows}</tbody></table></div>
+`);
+    const box = m.querySelector('.pk-modal'); if (box) { box.style.width='min(820px,94vw)'; box.style.maxWidth='94vw'; }
+};
 const pkVisualVideoFrameFingerprintStore = (() => {
     const DB_NAME = 'pk_visual_cache_v1';
     const STORE_NAME = 'video_keyframes';
@@ -50144,21 +51109,26 @@ const pkVisualVideoFrameFingerprintStore = (() => {
 })();
 window.pkVisualVideoFrameFingerprintStore = pkVisualVideoFrameFingerprintStore;
 
+// 4.6.62: thumbnail URLs returned by PikPak may be signed and/or short-lived.
+// NEVER mutate SIZE_MEDIUM/LARGE inside an already-issued URL: changing any signed
+// component can turn a valid thumbnail into a batch of HTTP 403 failures.  Small
+// thumbnails are requested from the metadata API only when a fresh URL is needed.
 const pkVisualRealThumbnailUrl = item => {
     const thumb = String(item && item.thumbnail_link || '').trim();
     const icon = String(item && item.icon_link || '').trim();
     if (!(thumb && /^https?:/i.test(thumb) && thumb !== icon)) return '';
-    // Visual hashing only needs 32x32 pixels. When PikPak encodes the requested
-    // thumbnail tier in the URL, use the small tier to reduce network/decode cost.
-    return thumb.replace(/SIZE_(?:LARGE|MEDIUM)/g, 'SIZE_SMALL');
+    return thumb;
 };
 
-const pkVisualResolveThumbnailUrl = async (item, signal) => {
-    let url = pkVisualRealThumbnailUrl(item);
+const pkVisualResolveThumbnailUrl = async (item, signal, options = {}) => {
+    const forceRefresh = !!options.forceRefresh;
+    let url = forceRefresh ? '' : pkVisualRealThumbnailUrl(item);
     if (url) return url;
-    // Only files lacking an indexed thumbnail need a detail request. This is much
-    // cheaper than resolving playable video URLs and seeking through the media.
-    const detail = await pkVisualResolveDetail(item, signal);
+    // Missing or failed persisted thumbnails are refreshed through the PikPak API.
+    // This also repairs expired signed URLs restored from the long-lived catalog.
+    const detail = await pkVisualResolveDetail(item, signal, {
+        thumbnailSize: pkVisualRuntimePerformance.preferSmallThumbnail ? 'SIZE_SMALL' : 'SIZE_MEDIUM'
+    });
     url = pkVisualRealThumbnailUrl(detail);
     if (url) {
         item.thumbnail_link = url;
@@ -50174,13 +51144,78 @@ const pkVisualResolveThumbnailUrl = async (item, signal) => {
     throw new Error('没有可读取的缩略图');
 };
 
-const pkVisualFingerprintThumbnailItem = async (item, signal) => {
+const pkVisualFingerprintThumbnailItem = async (item, signal, onStage = null, options = {}) => {
+    if (onStage) onStage('cache_check');
     const cached = await pkVisualThumbFingerprintStore.get(item);
-    if (cached && cached.hash) return { item, hash: cached.hash, contrast: cached.contrast, cached: true };
-    const url = await pkVisualResolveThumbnailUrl(item, signal);
-    const fp = await pkVisualImagePHash(url, signal);
+    if (cached && cached.hash) {
+        if (onStage) onStage('cache_hit');
+        return { item, hash: cached.hash, contrast: cached.contrast, cached: true };
+    }
+    if (onStage) onStage('resolve_start');
+    const url = await pkVisualResolveThumbnailUrl(item, signal, options);
+    if (onStage) onStage('resolve_done');
+    const fp = await pkVisualImagePHash(url, signal, onStage);
     void pkVisualThumbFingerprintStore.put(item, fp);
+    if (onStage) onStage('complete');
     return { item, hash: fp.hash, contrast: fp.contrast, cached: false };
+};
+
+// 4.6.50: make thumbnail visual-analysis progress explicit.  Thumbnail work has
+// a network phase (download), an image-decode phase and a local pHash phase; the
+// old single "calculating fingerprint" label made a slow CDN look like slow CPU.
+const pkVisualCreateThumbnailPhaseTracker = (kindLabel, total) => {
+    const stateByIndex = new Map();
+    const cacheHits = new Set();
+    const resolved = new Set();
+    const downloaded = new Set();
+    const decoded = new Set();
+    const hashed = new Set();
+    const completed = new Set();
+    const timers = new Map();
+    const sums = { resolveMs: 0, downloadMs: 0, decodeMs: 0, hashMs: 0 };
+    const stagePair = {
+        resolve_start: ['resolve', null], resolve_done: ['resolve', 'resolveMs'],
+        download_start: ['download', null], download_done: ['download', 'downloadMs'],
+        decode_start: ['decode', null], decode_done: ['decode', 'decodeMs'],
+        hash_start: ['hash', null], hash_done: ['hash', 'hashMs']
+    };
+    let lastPaint = 0;
+    const paint = force => {
+        const now = Date.now();
+        if (!force && now - lastPaint < 80) return;
+        lastPaint = now;
+        const networkTotal = Math.max(0, total - cacheHits.size);
+        const activeDownload = Array.from(stateByIndex.values()).filter(v => v === 'download_start').length;
+        const activeHash = Array.from(stateByIndex.values()).filter(v => v === 'hash_start').length;
+        const activeDecode = Array.from(stateByIndex.values()).filter(v => v === 'decode_start').length;
+        let current = '读取缓存';
+        if (activeDownload > 0) current = '下载缩略图';
+        else if (activeDecode > 0) current = '解码缩略图';
+        else if (activeHash > 0) current = '计算 pHash';
+        else if (completed.size + cacheHits.size >= total) current = '缩略图指纹完成';
+        updateLoadTxt(`${kindLabel}：${current} · 网络下载 ${downloaded.size}/${networkTotal} · 解码 ${decoded.size}/${networkTotal} · 本地 pHash ${hashed.size}/${networkTotal} · 缓存命中 ${cacheHits.size}/${total}`);
+    };
+    const tracker = (index, stage) => {
+        stateByIndex.set(index, stage);
+        const pair = stagePair[stage];
+        if (pair) {
+            const timerKey = `${index}:${pair[0]}`;
+            if (!pair[1]) timers.set(timerKey, pkVisualNow());
+            else {
+                const started = timers.get(timerKey); if (Number.isFinite(started)) sums[pair[1]] += Math.max(0, pkVisualNow() - started);
+                timers.delete(timerKey);
+            }
+        }
+        if (stage === 'cache_hit') { cacheHits.add(index); completed.add(index); }
+        else if (stage === 'resolve_done') resolved.add(index);
+        else if (stage === 'download_done') downloaded.add(index);
+        else if (stage === 'decode_done') decoded.add(index);
+        else if (stage === 'hash_done') hashed.add(index);
+        else if (stage === 'complete') completed.add(index);
+        paint(stage === 'complete' || stage === 'cache_hit');
+    };
+    tracker.getStats = () => ({ total, cacheHits: cacheHits.size, networkTotal: Math.max(0, total-cacheHits.size), resolved: resolved.size, downloaded: downloaded.size, decoded: decoded.size, hashed: hashed.size, completed: completed.size, ...sums });
+    return tracker;
 };
 // This scan is intentionally independent from the existing file duplicate and
 // folder containment analyzers.  It recursively collects only the selected
@@ -50191,7 +51226,7 @@ const pkVisualMapConcurrent = async (items, concurrency, worker, signal, onProgr
     const out = new Array(list.length);
     let next = 0;
     let done = 0;
-    const count = Math.max(1, Math.min(8, Number(concurrency) || 1));
+    const count = Math.max(1, Math.min(16, Number(concurrency) || 1));
     const runners = new Array(Math.min(count, Math.max(1, list.length))).fill(0).map(async () => {
         while (true) {
             if (signal && signal.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -50255,21 +51290,20 @@ const pkVisualCollectScopeMedia = async (selectedTargets, config, signal, onProg
     }
 
     if (!roots.length) return Array.from(fileMap.values());
+    if (window.pkAnalysisCatalog) {
+        const collected = await window.pkAnalysisCatalog.collectScopeFiles(roots, Array.from(fileMap.values()), {
+            signal, background: false, requireComplete: true,
+            onProgress: st => { if (onProgress) onProgress(st, fileMap.size + Number(st && st.files || 0)); }
+        });
+        collected.files.forEach(file => { if (isWanted(file)) fileMap.set(String(file.id), file); });
+        if (onProgress) onProgress({ folders: collected.snapshot.folderCount, files: collected.snapshot.fileCount, fromCatalog: true }, fileMap.size);
+        return Array.from(fileMap.values());
+    }
     await coreRecursiveEngine(roots, {
         signal,
-        onFile: (file, parent) => {
-            if (!isWanted(file)) return;
-            file._lineage = (parent && parent.lineage) ? parent.lineage : [];
-            fileMap.set(file.id, file);
-        },
-        onFolder: (folder, filesInFolder) => {
-            if (typeof globalCache !== 'undefined' && !globalCache.has(folder.id)) globalCache.set(folder.id, [...filesInFolder]);
-            indexParents(folder.id, folder.name, filesInFolder);
-            if (typeof globalLineageMap !== 'undefined') globalLineageMap.set(folder.id, folder.lineage);
-        },
-        onProgress: st => {
-            if (onProgress) onProgress(st, fileMap.size);
-        }
+        onFile: (file, parent) => { if (!isWanted(file)) return; file._lineage = (parent && parent.lineage) ? parent.lineage : []; fileMap.set(file.id, file); },
+        onFolder: (folder, filesInFolder) => { indexParents(folder.id, folder.name, filesInFolder); if (typeof globalLineageMap !== 'undefined') globalLineageMap.set(folder.id, folder.lineage); },
+        onProgress: st => { if (onProgress) onProgress(st, fileMap.size); }
     });
     return Array.from(fileMap.values());
 };
@@ -50285,7 +51319,7 @@ const pkVisualHashChunkValue = (hash, start, end) => {
 };
 
 const pkVisualBuildImageEdges = async (fingerprints, threshold, signal, onProgress = null, pairFilter = null) => {
-    const fps = (Array.isArray(fingerprints) ? fingerprints : []).filter(x => x && x.item && x.hash && x.hash.length && (Number(x.contrast) || 0) >= 1.0);
+    const fps = (Array.isArray(fingerprints) ? fingerprints : []).filter(x => x && x.item && x.hash && x.hash.length && (Number(x.contrast) || 0) >= Math.max(0, Number(pkVisualRuntimePerformance.thumbnailContrastMin) || 0));
     if (fps.length < 2) return [];
     const hashLen = fps[0].hash.length;
     const maxDiff = Math.max(0, Math.floor(hashLen * (1 - threshold) + 1e-9));
@@ -50349,7 +51383,8 @@ const pkVisualCompareCapturedVideoFingerprints = (a, b, minFrames = 3) => {
             frameRows.push({ index, fraction, score: null, note: '帧提取失败' });
             return;
         }
-        if ((fa.contrast || 0) < 4 || (fb.contrast || 0) < 4) {
+        const minFrameContrast = Math.max(0, Number(pkVisualRuntimePerformance.frameContrastMin) || 0);
+        if ((fa.contrast || 0) < minFrameContrast || (fb.contrast || 0) < minFrameContrast) {
             frameRows.push({ index, fraction, score: null, note: '低信息帧已忽略' });
             return;
         }
@@ -50379,7 +51414,7 @@ const pkVisualBuildVideoEdges = async (fingerprints, threshold, signal, onProgre
         for (let j = i + 1; j < fps.length; j++) {
             const db = Number(fps[j].duration) || 0;
             if (!(db > 0)) continue;
-            const tolerance = Math.max(10, Math.max(da, db) * 0.02); // 10 sec or 2%
+            const tolerance = pkVisualDurationTolerance(da, db); // 10 sec or 2%
             const diff = db - da;
             if (diff > tolerance) break;
             candidatePairs.push([i, j]);
@@ -50408,7 +51443,7 @@ const pkVisualKnownDuration = item => Math.max(0, Number(item && (item._history_
 const pkVisualVideoDurationPairFilter = (a, b) => {
     const da = pkVisualKnownDuration(a), db = pkVisualKnownDuration(b);
     if (!(da > 0) || !(db > 0)) return true;
-    const tolerance = Math.max(10, Math.max(da, db) * 0.02);
+    const tolerance = pkVisualDurationTolerance(da, db);
     return Math.abs(da - db) <= tolerance;
 };
 
@@ -50418,7 +51453,7 @@ const pkVisualFilterVideoThumbnailCandidatesByDuration = (edges, itemById) => {
         const b = itemById.get(String(edge && edge.b || ''));
         const da = pkVisualKnownDuration(a), db = pkVisualKnownDuration(b);
         if (!(da > 0) || !(db > 0)) return true;
-        const tolerance = Math.max(10, Math.max(da, db) * 0.02);
+        const tolerance = pkVisualDurationTolerance(da, db);
         return Math.abs(da - db) <= tolerance;
     });
 };
@@ -50436,7 +51471,7 @@ const pkVisualClassifyAdaptiveVideoCandidates = async (candidateEdges, fingerpri
         let result = null;
         if (a && b) {
             const da = Math.max(0, Number(a.duration) || 0), db = Math.max(0, Number(b.duration) || 0);
-            const tolerance = Math.max(10, Math.max(da, db) * 0.02);
+            const tolerance = pkVisualDurationTolerance(da, db);
             if (!(da > 0 && db > 0) || Math.abs(da - db) <= tolerance) result = pkVisualCompareCapturedVideoFingerprints(a, b, 3);
         }
         if (!result) {
@@ -50469,7 +51504,7 @@ const pkVisualRefineVideoCandidateEdges = async (candidateEdges, fingerprintById
         const b = fingerprintById.get(String(candidate.b || ''));
         if (a && b) {
             const da = Math.max(0, Number(a.duration) || 0), db = Math.max(0, Number(b.duration) || 0);
-            const tolerance = Math.max(10, Math.max(da, db) * 0.02);
+            const tolerance = pkVisualDurationTolerance(da, db);
             if (!(da > 0 && db > 0) || Math.abs(da - db) <= tolerance) {
                 const result = pkVisualCompareCapturedVideoFingerprints(a, b, minFrames);
                 if (result && result.score + 1e-12 >= threshold) {
@@ -50637,7 +51672,7 @@ const pkVisualAnnotateWatermarks = async (groups, mediaItems, signal, onProgress
     const ids=new Set(); list.forEach(g=>(g.ids||[]).forEach(id=>ids.add(String(id))));
     const items=Array.from(ids).map(id=>itemMap.get(id)).filter(Boolean);
     const samples=new Map();
-    const rows=await pkVisualMapConcurrent(items,Math.max(3,Math.min(6,pkVisualPHashWorkerPool.size||3)),async item=>{
+    const rows=await pkVisualMapConcurrent(items,Math.max(1,Number(pkVisualRuntimePerformance.watermarkConcurrency)||4),async item=>{
         try { return await pkVisualLoadWatermarkSample(item,signal); } catch(e) { if(e&&e.name==='AbortError')throw e; return null; }
     },signal,(done,total)=>{if(onProgress)onProgress('sample',done,total);});
     rows.forEach(row=>{if(row&&row.item&&row.gray)samples.set(String(row.item.id||''),row);});
@@ -50645,7 +51680,7 @@ const pkVisualAnnotateWatermarks = async (groups, mediaItems, signal, onProgress
     for(const group of list){
         if(signal&&signal.aborted)throw new DOMException('Aborted','AbortError');
         const members=(group.ids||[]).map(id=>itemMap.get(String(id))).filter(Boolean);
-        const votes=new Map(); let pairBudget=60;
+        const votes=new Map(); let pairBudget=Math.max(5,Number(pkVisualRuntimePerformance.watermarkPairBudget)||60);
         for(let i=0;i<members.length-1&&pairBudget>0;i++)for(let j=i+1;j<members.length&&pairBudget>0;j++,pairBudget--){
             const a=samples.get(String(members[i].id)),b=samples.get(String(members[j].id)); if(!a||!b)continue;
             const hit=pkVisualCompareWatermarkSamples(a,b); if(!hit)continue;
@@ -50674,6 +51709,7 @@ const pkVisualOpenStandaloneModal = selectedTargets => new Promise(resolve => {
     const lastMode = lastModeRaw === 'precise' ? 'precise' : 'thumbnail';
     const lastFrameCount = Math.max(1, Math.min(5, Math.round(Number(gmGet('pk_visual_dup_frame_count', 3)) || 3)));
     const lastFramePositions = pkVisualParseFramePositionsPct(gmGet('pk_visual_dup_frame_positions', pkVisualDefaultFramePositionsPct(lastFrameCount).join(',')), lastFrameCount) || pkVisualDefaultFramePositionsPct(lastFrameCount);
+    const lastPerf = pkVisualReadPerformanceConfig();
     const targetDesc = selectedTargets.length
         ? (L.msg_visual_scope_selected || '对选中的 {n} 个项目递归执行视觉去重').replace('{n}', selectedTargets.length)
         : (L.msg_visual_scope_current || '对当前路径递归执行视觉去重');
@@ -50692,6 +51728,33 @@ const pkVisualOpenStandaloneModal = selectedTargets => new Promise(resolve => {
     <div style="position:relative;"><input id="pk-vis-frame-count" type="number" min="1" max="5" step="1" value="${lastFrameCount}" style="width:100%;height:42px;border:2px solid var(--pk-bd);border-radius:8px;background:var(--pk-bg);color:var(--pk-fg);font-size:14px;font-weight:800;padding:0 10px;box-sizing:border-box;"><div style="position:absolute;top:0;left:8px;transform:translateY(-50%);background:var(--pk-bg);padding:0 4px;font-size:10px;color:var(--pk-pri);font-weight:800;">抽帧数量</div></div>
     <div style="position:relative;"><input id="pk-vis-frame-positions" type="text" value="${lastFramePositions.join(',')}" placeholder="例如 50 或 20,50,80" style="width:100%;height:42px;border:2px solid var(--pk-bd);border-radius:8px;background:var(--pk-bg);color:var(--pk-fg);font-size:14px;font-weight:700;padding:0 10px;box-sizing:border-box;"><div style="position:absolute;top:0;left:8px;transform:translateY(-50%);background:var(--pk-bg);padding:0 4px;font-size:10px;color:var(--pk-pri);font-weight:800;">抽帧位置 (%)</div></div>
 </div>
+<details id="pk-vis-perf-details" style="margin-bottom:16px;border:1px solid var(--pk-bd);border-radius:9px;background:var(--pk-bg);">
+<summary style="cursor:pointer;padding:10px 12px;font-size:13px;font-weight:800;color:var(--pk-fg);user-select:none;">性能参数 <span style="font-size:11px;font-weight:500;opacity:.58;">（影响速度 / 网络 / CPU）</span></summary>
+<div style="padding:2px 12px 12px;">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin:5px 0 10px;">
+        <button type="button" class="pk-btn pk-vis-perf-preset" data-preset="stable" style="height:27px;font-size:11px;padding:0 9px;">稳定</button>
+        <button type="button" class="pk-btn pk-vis-perf-preset" data-preset="balanced" style="height:27px;font-size:11px;padding:0 9px;">均衡</button>
+        <button type="button" class="pk-btn pk-vis-perf-preset" data-preset="fast" style="height:27px;font-size:11px;padding:0 9px;">暴力并发</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;">
+        <label style="font-size:11px;line-height:1.35;">缩略图下载/解码并发 <input id="pk-vis-perf-thumb-conc" type="number" min="1" max="16" step="1" value="${lastPerf.thumbnailConcurrency}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">pHash Worker 数 <input id="pk-vis-perf-workers" type="number" min="1" max="8" step="1" value="${lastPerf.phashWorkers}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">视频精确验证并发 <input id="pk-vis-perf-video-conc" type="number" min="1" max="4" step="1" value="${lastPerf.preciseVideoConcurrency}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">候选阈值放宽（百分点） <input id="pk-vis-perf-candidate-relax" type="number" min="0" max="15" step="0.5" value="${lastPerf.candidateRelaxPct}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">视频时长容差（秒） <input id="pk-vis-perf-duration-sec" type="number" min="0" max="120" step="1" value="${lastPerf.durationToleranceSec}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">视频时长容差（%） <input id="pk-vis-perf-duration-pct" type="number" min="0" max="20" step="0.5" value="${lastPerf.durationTolerancePct}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">缩略图低信息过滤 <input id="pk-vis-perf-thumb-contrast" type="number" min="0" max="30" step="0.5" value="${lastPerf.thumbnailContrastMin}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">关键帧低信息过滤 <input id="pk-vis-perf-frame-contrast" type="number" min="0" max="40" step="0.5" value="${lastPerf.frameContrastMin}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">水印缩略图并发 <input id="pk-vis-perf-watermark-conc" type="number" min="1" max="12" step="1" value="${lastPerf.watermarkConcurrency}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+        <label style="font-size:11px;line-height:1.35;">每组水印比较上限 <input id="pk-vis-perf-watermark-pairs" type="number" min="5" max="300" step="5" value="${lastPerf.watermarkPairBudget}" style="width:100%;height:34px;margin-top:4px;border:1px solid var(--pk-bd);border-radius:7px;background:var(--pk-bg);color:var(--pk-fg);padding:0 8px;box-sizing:border-box;"></label>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;"><input id="pk-vis-perf-small-thumb" type="checkbox" ${lastPerf.preferSmallThumbnail ? 'checked' : ''} style="accent-color:var(--pk-pri);">刷新链接时优先使用小缩略图</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;"><input id="pk-vis-perf-watermark-enabled" type="checkbox" ${lastPerf.watermarkEnabled ? 'checked' : ''} style="accent-color:var(--pk-pri);">自动分析疑似水印</label>
+    </div>
+    <div style="margin-top:8px;font-size:10px;line-height:1.5;opacity:.6;">并发越高越快，但会增加网络、CPU、内存压力；候选放宽越大、时长容差越宽，候选越多也越慢。提高低信息过滤可减少黑场/纯色图比较，但过高可能漏掉低对比度资源。暴力并发只拉满缩略图、pHash、视频验证和水印分析的并发数，不修改抽帧、候选阈值、时长容差、过滤阈值、水印开关等准确率相关参数。</div>
+</div>
+</details>
 <div style="position:relative;margin-bottom:8px;">
 <input id="pk-vis-threshold" type="number" min="80" max="100" step="0.1" value="${lastThreshold}" style="width:100%;height:42px;border:2px solid var(--pk-bd);border-radius:8px;background:var(--pk-bg);color:var(--pk-fg);font-size:16px;font-weight:800;padding:0 12px;box-sizing:border-box;outline:none;">
 <div style="position:absolute;top:0;left:10px;transform:translateY(-50%);background:var(--pk-bg);padding:0 5px;font-size:11px;font-weight:800;color:var(--pk-pri);">${esc(L.lbl_visual_threshold || '视觉相似阈值')} (%)</div>
@@ -50721,6 +51784,32 @@ const pkVisualOpenStandaloneModal = selectedTargets => new Promise(resolve => {
         frameCountInput.value = String(count);
         framePositionsInput.value = pkVisualDefaultFramePositionsPct(count).join(',');
         framePositionsInput.style.borderColor = 'var(--pk-bd)';
+    });
+    const setPerfField = (id, value) => { const el = m.querySelector(id); if (el) el.value = String(value); };
+    const setPerfChecked = (id, value) => { const el = m.querySelector(id); if (el) el.checked = !!value; };
+    m.querySelectorAll('.pk-vis-perf-preset').forEach(btn => btn.onclick = () => {
+        const hwWorkers = pkVisualAutoPHashWorkers(), autoVideo = pkVisualAutoPreciseConcurrency();
+        const preset = String(btn.dataset.preset || 'balanced');
+        if (preset === 'fast') {
+            // 4.6.54: brutal means concurrency only. Never touch any parameter that can
+            // change candidate coverage, frame sampling, filtering or watermark behavior.
+            // The user's current accuracy/stability settings remain exactly as configured.
+            setPerfField('#pk-vis-perf-thumb-conc', 16);
+            setPerfField('#pk-vis-perf-workers', 8);
+            setPerfField('#pk-vis-perf-video-conc', 4);
+            setPerfField('#pk-vis-perf-watermark-conc', 12);
+            showToast('暴力并发：缩略图16路 / Worker8 / 视频验证4路 / 水印12路；其余判断参数保持不变', 'success', 4200);
+            return;
+        }
+        const values = preset === 'stable'
+            ? { thumb:4, workers:Math.min(2,hwWorkers), video:1, relax:6, dsec:8, dpct:1.5, tcon:1, fcon:4, wmcon:2, wmpairs:40, small:true, wm:true }
+            : { thumb:8, workers:hwWorkers, video:autoVideo, relax:8, dsec:10, dpct:2, tcon:1, fcon:4, wmcon:4, wmpairs:60, small:true, wm:true };
+        setPerfField('#pk-vis-perf-thumb-conc', values.thumb); setPerfField('#pk-vis-perf-workers', values.workers);
+        setPerfField('#pk-vis-perf-video-conc', values.video); setPerfField('#pk-vis-perf-candidate-relax', values.relax);
+        setPerfField('#pk-vis-perf-duration-sec', values.dsec); setPerfField('#pk-vis-perf-duration-pct', values.dpct);
+        setPerfField('#pk-vis-perf-thumb-contrast', values.tcon); setPerfField('#pk-vis-perf-frame-contrast', values.fcon);
+        setPerfField('#pk-vis-perf-watermark-conc', values.wmcon); setPerfField('#pk-vis-perf-watermark-pairs', values.wmpairs);
+        setPerfChecked('#pk-vis-perf-small-thumb', values.small); setPerfChecked('#pk-vis-perf-watermark-enabled', values.wm);
     });
     const exportBtn = m.querySelector('#pk-vis-cache-export');
     const importBtn = m.querySelector('#pk-vis-cache-import');
@@ -50800,13 +51889,45 @@ const pkVisualOpenStandaloneModal = selectedTargets => new Promise(resolve => {
             return;
         }
         const finalPositionsPct = framePositionsPct || pkVisualDefaultFramePositionsPct(frameCount);
+        const perfNum = (id, min, max, fallback, round = false) => {
+            const el = m.querySelector(id), raw = Number(el && el.value);
+            const value = Number.isFinite(raw) ? raw : fallback;
+            const clamped = Math.max(min, Math.min(max, value));
+            return round ? Math.round(clamped) : clamped;
+        };
+        const performance = {
+            thumbnailConcurrency: perfNum('#pk-vis-perf-thumb-conc', 1, 16, 8, true),
+            phashWorkers: perfNum('#pk-vis-perf-workers', 1, 8, pkVisualAutoPHashWorkers(), true),
+            preciseVideoConcurrency: perfNum('#pk-vis-perf-video-conc', 1, 4, pkVisualAutoPreciseConcurrency(), true),
+            candidateRelaxPct: perfNum('#pk-vis-perf-candidate-relax', 0, 15, 8),
+            durationToleranceSec: perfNum('#pk-vis-perf-duration-sec', 0, 120, 10),
+            durationTolerancePct: perfNum('#pk-vis-perf-duration-pct', 0, 20, 2),
+            thumbnailContrastMin: perfNum('#pk-vis-perf-thumb-contrast', 0, 30, 1),
+            frameContrastMin: perfNum('#pk-vis-perf-frame-contrast', 0, 40, 4),
+            watermarkConcurrency: perfNum('#pk-vis-perf-watermark-conc', 1, 12, 4, true),
+            watermarkPairBudget: perfNum('#pk-vis-perf-watermark-pairs', 5, 300, 60, true),
+            preferSmallThumbnail: !!(m.querySelector('#pk-vis-perf-small-thumb') && m.querySelector('#pk-vis-perf-small-thumb').checked),
+            watermarkEnabled: !!(m.querySelector('#pk-vis-perf-watermark-enabled') && m.querySelector('#pk-vis-perf-watermark-enabled').checked)
+        };
+        gmSet('pk_visual_perf_thumb_concurrency', performance.thumbnailConcurrency);
+        gmSet('pk_visual_perf_phash_workers', performance.phashWorkers);
+        gmSet('pk_visual_perf_video_concurrency', performance.preciseVideoConcurrency);
+        gmSet('pk_visual_perf_candidate_relax', performance.candidateRelaxPct);
+        gmSet('pk_visual_perf_duration_sec', performance.durationToleranceSec);
+        gmSet('pk_visual_perf_duration_pct', performance.durationTolerancePct);
+        gmSet('pk_visual_perf_thumb_contrast', performance.thumbnailContrastMin);
+        gmSet('pk_visual_perf_frame_contrast', performance.frameContrastMin);
+        gmSet('pk_visual_perf_watermark_concurrency', performance.watermarkConcurrency);
+        gmSet('pk_visual_perf_watermark_pairs', performance.watermarkPairBudget);
+        gmSet('pk_visual_perf_small_thumb', performance.preferSmallThumbnail);
+        gmSet('pk_visual_perf_watermark_enabled', performance.watermarkEnabled);
         gmSet('pk_visual_dup_images', images);
         gmSet('pk_visual_dup_videos', videos);
         gmSet('pk_visual_dup_threshold', pct);
         gmSet('pk_visual_dup_mode', mode);
         gmSet('pk_visual_dup_frame_count', frameCount);
         gmSet('pk_visual_dup_frame_positions', finalPositionsPct.join(','));
-        finish({ images, videos, mode, thresholdPct: pct, threshold: pct / 100, frameCount, framePositionsPct: finalPositionsPct, frameFractions: finalPositionsPct.map(v => v / 100) });
+        finish({ images, videos, mode, thresholdPct: pct, threshold: pct / 100, frameCount, framePositionsPct: finalPositionsPct, frameFractions: finalPositionsPct.map(v => v / 100), performance });
     };
 });
 
@@ -50821,6 +51942,7 @@ const runStandaloneVisualDedupe = async () => {
     }
     const config = await pkVisualOpenStandaloneModal(selectedTargets);
     if (!config) return;
+    config.performance = pkVisualApplyPerformanceConfig(config.performance);
 
     S.scanning = true;
     syncLocalUploadVisibility();
@@ -50830,6 +51952,8 @@ const runStandaloneVisualDedupe = async () => {
     S.scanAbortController = new AbortController();
     const signal = S.scanAbortController.signal;
     setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
+    const visualTiming = pkVisualCreateRunTiming(config);
+    const commitVisualTiming = status => pkVisualTimingFinalize(visualTiming, status);
     UI.stopBtn.onclick = () => {
         S.scanning = false;
         try { S.scanAbortController && S.scanAbortController.abort(); } catch (e) {}
@@ -50838,54 +51962,84 @@ const runStandaloneVisualDedupe = async () => {
 
     try {
         updateLoadTxt(L.msg_visual_collect || '正在收集视觉媒体…');
-        const mediaItems = await pkVisualCollectScopeMedia(selectedTargets, config, signal, (st, count) => {
+        const mediaItems = await pkVisualTimingMeasure(visualTiming, 'collect', () => pkVisualCollectScopeMedia(selectedTargets, config, signal, (st, count) => {
             const folderCount = Number(st && (st.folders || st.completed || st.processedFolders)) || 0;
             updateLoadTxt(`${L.msg_visual_collect || '正在收集视觉媒体…'} ${folderCount ? `${folderCount} 文件夹 · ` : ''}${count} 文件`);
-        });
+        }));
         if (!S.scanning || signal.aborted || myScanId !== S.scanId) return;
 
         const imageItems = config.images ? mediaItems.filter(isImageLikeItem) : [];
         const videoItems = config.videos ? mediaItems.filter(item => isVideoLikeItem(item) && !isImageLikeItem(item)) : [];
+        visualTiming.counts.media = mediaItems.length; visualTiming.counts.images = imageItems.length; visualTiming.counts.videos = videoItems.length;
         if (!imageItems.length && !videoItems.length) {
-            showToast(L.msg_visual_none_media || '所选范围没有可进行视觉分析的图片或视频', 'warning', 4200);
+            const t = commitVisualTiming('no_media');
+            showToast(`${L.msg_visual_none_media || '所选范围没有可进行视觉分析的图片或视频'} · 耗时 ${pkVisualFormatElapsed(t.totalMs)}`, 'warning', 4200);
             return;
         }
 
         updateLoadTxt('正在载入本地视觉指纹索引…');
-        try { await pkVisualThumbFingerprintStore.preload(); } catch (e) {}
+        try { await pkVisualTimingMeasure(visualTiming, 'thumbCache', () => pkVisualThumbFingerprintStore.preload()); } catch (e) {}
         if (!S.scanning || signal.aborted || myScanId !== S.scanId) return;
 
         // 4.6.30: one fast thumbnail pHash pass for both images and videos.
         // Fingerprints are persisted, so unchanged media normally skips both network
         // thumbnail reads and pHash computation on later runs.
         const imageFingerprints = [];
+        let imageFingerprintFailed = 0;
         if (imageItems.length) {
-            const hashed = await pkVisualMapConcurrent(imageItems, Math.max(6, Math.min(10, (pkVisualPHashWorkerPool.size || 3) * 2)), async item => pkVisualFingerprintThumbnailItem(item, signal), signal, (done, total) => {
-                updateLoadTxt((L.msg_visual_hash_images || '正在计算图片缩略图指纹 {done}/{total}').replace('{done}', done).replace('{total}', total));
+            const imagePhase = pkVisualCreateThumbnailPhaseTracker(`图片缩略图处理 · 并发${config.performance.thumbnailConcurrency}/Worker${config.performance.phashWorkers}`, imageItems.length);
+            const hashed = await pkVisualTimingMeasure(visualTiming, 'imageThumb', () => pkVisualMapConcurrent(imageItems, Math.max(1, Number(config.performance.thumbnailConcurrency) || 8), async (item, index) => pkVisualFingerprintThumbnailItem(item, signal, stage => imagePhase(index, stage)), signal));
+            const failedItems = [];
+            hashed.forEach(fp => {
+                if (fp && fp.hash && fp.item) imageFingerprints.push(fp);
+                else if (fp && fp.item) failedItems.push(fp.item);
             });
-            hashed.forEach(fp => { if (fp && fp.hash && fp.item) imageFingerprints.push(fp); });
+            // High thumbnail concurrency may briefly trigger CDN/browser connection
+            // pressure. Keep the configured "brutal" first pass, but retry failures
+            // at a conservative concurrency instead of silently turning them into
+            // missing fingerprints / zero visual groups.
+            if (failedItems.length && !signal.aborted) {
+                updateLoadTxt(`图片缩略图首轮失败 ${failedItems.length}，正在刷新缩略图链接并低并发重试…`);
+                await sleep(250);
+                const retry = await pkVisualMapConcurrent(failedItems, Math.min(4, Math.max(1, Number(config.performance.thumbnailConcurrency) || 8)), async item => pkVisualFingerprintThumbnailItem(item, signal, null, { forceRefresh: true }), signal);
+                retry.forEach(fp => { if (fp && fp.hash && fp.item) imageFingerprints.push(fp); });
+                imageFingerprintFailed = retry.filter(fp => !(fp && fp.hash && fp.item)).length;
+            }
+            visualTiming.details.imageThumb = { ...imagePhase.getStats(), failed: imageFingerprintFailed };
         }
         if (!S.scanning || signal.aborted || myScanId !== S.scanId) return;
 
         const videoThumbnailFingerprints = [];
+        let videoFingerprintFailed = 0;
         if (videoItems.length) {
-            const hashed = await pkVisualMapConcurrent(videoItems, Math.max(6, Math.min(10, (pkVisualPHashWorkerPool.size || 3) * 2)), async item => pkVisualFingerprintThumbnailItem(item, signal), signal, (done, total) => {
-                updateLoadTxt((L.msg_visual_hash_videos || '正在计算视频缩略图指纹 {done}/{total}').replace('{done}', done).replace('{total}', total));
+            const videoPhase = pkVisualCreateThumbnailPhaseTracker(`视频缩略图处理 · 并发${config.performance.thumbnailConcurrency}/Worker${config.performance.phashWorkers}`, videoItems.length);
+            const hashed = await pkVisualTimingMeasure(visualTiming, 'videoThumb', () => pkVisualMapConcurrent(videoItems, Math.max(1, Number(config.performance.thumbnailConcurrency) || 8), async (item, index) => pkVisualFingerprintThumbnailItem(item, signal, stage => videoPhase(index, stage)), signal));
+            const failedItems = [];
+            hashed.forEach(fp => {
+                if (fp && fp.hash && fp.item) videoThumbnailFingerprints.push(fp);
+                else if (fp && fp.item) failedItems.push(fp.item);
             });
-            hashed.forEach(fp => { if (fp && fp.hash && fp.item) videoThumbnailFingerprints.push(fp); });
+            if (failedItems.length && !signal.aborted) {
+                updateLoadTxt(`视频缩略图首轮失败 ${failedItems.length}，正在刷新缩略图链接并低并发重试…`);
+                await sleep(300);
+                const retry = await pkVisualMapConcurrent(failedItems, Math.min(4, Math.max(1, Number(config.performance.thumbnailConcurrency) || 8)), async item => pkVisualFingerprintThumbnailItem(item, signal, null, { forceRefresh: true }), signal);
+                retry.forEach(fp => { if (fp && fp.hash && fp.item) videoThumbnailFingerprints.push(fp); });
+                videoFingerprintFailed = retry.filter(fp => !(fp && fp.hash && fp.item)).length;
+            }
+            visualTiming.details.videoThumb = { ...videoPhase.getStats(), failed: videoFingerprintFailed };
         }
         if (!S.scanning || signal.aborted || myScanId !== S.scanId) return;
 
         updateLoadTxt(L.msg_visual_match || '正在匹配视觉指纹…');
-        const imageEdges = await pkVisualBuildImageEdges(imageFingerprints, config.threshold, signal, (done, total) => {
+        const imageEdges = await pkVisualTimingMeasure(visualTiming, 'imageMatch', () => pkVisualBuildImageEdges(imageFingerprints, config.threshold, signal, (done, total) => {
             if (total) updateLoadTxt(`${L.msg_visual_match || '正在匹配视觉指纹…'} 图片 ${done}/${total}`);
-        });
+        }));
 
         let videoEdges = [];
         if (config.mode !== 'precise') {
-            videoEdges = await pkVisualBuildImageEdges(videoThumbnailFingerprints, config.threshold, signal, (done, total) => {
+            videoEdges = await pkVisualTimingMeasure(visualTiming, 'videoMatch', () => pkVisualBuildImageEdges(videoThumbnailFingerprints, config.threshold, signal, (done, total) => {
                 if (total) updateLoadTxt(`${L.msg_visual_match || '正在匹配视觉指纹…'} 视频缩略图 ${done}/${total}`);
-            }, pkVisualVideoDurationPairFilter);
+            }, pkVisualVideoDurationPairFilter));
         } else if (videoThumbnailFingerprints.length >= 2) {
             // 4.6.42 configurable precise mode:
             // thumbnail candidates -> capture exactly the user-selected 1~5 relative positions.
@@ -50894,58 +52048,73 @@ const runStandaloneVisualDedupe = async () => {
                 .filter((v, i, arr) => arr.findIndex(x => Math.abs(x - v) < 1e-6) === i)
                 .sort((a, b) => a - b);
             const minValidFrames = pkVisualFrameRequiredValid(frameFractions);
-            const candidateThreshold = Math.max(0.82, config.threshold - 0.08);
-            let candidateEdges = await pkVisualBuildImageEdges(videoThumbnailFingerprints, candidateThreshold, signal, (done, total) => {
+            const candidateThreshold = Math.max(0.80, config.threshold - (Math.max(0, Number(config.performance.candidateRelaxPct) || 0) / 100));
+            let candidateEdges = await pkVisualTimingMeasure(visualTiming, 'videoCandidate', () => pkVisualBuildImageEdges(videoThumbnailFingerprints, candidateThreshold, signal, (done, total) => {
                 if (total) updateLoadTxt(`${L.msg_visual_match || '正在匹配视觉指纹…'} 视频候选 ${done}/${total}`);
-            }, pkVisualVideoDurationPairFilter);
+            }, pkVisualVideoDurationPairFilter));
             const itemById = new Map(videoItems.map(item => [String(item.id || ''), item]));
             candidateEdges = pkVisualFilterVideoThumbnailCandidatesByDuration(candidateEdges, itemById);
+            visualTiming.counts.videoCandidates = candidateEdges.length;
             if (candidateEdges.length) {
                 updateLoadTxt('正在载入关键帧指纹缓存…');
-                try { await pkVisualVideoFrameFingerprintStore.preload(); } catch (e) {}
+                try { await pkVisualTimingMeasure(visualTiming, 'frameCache', () => pkVisualVideoFrameFingerprintStore.preload()); } catch (e) {}
                 const candidateIds = new Set();
                 candidateEdges.forEach(edge => { candidateIds.add(String(edge.a || '')); candidateIds.add(String(edge.b || '')); });
                 const candidateItems = videoItems.filter(item => candidateIds.has(String(item.id || '')));
+                visualTiming.counts.preciseVideos = candidateItems.length;
                 const capturedById = new Map();
                 const concurrency = pkVisualPreciseVideoConcurrency();
-                const rows = await pkVisualMapConcurrent(candidateItems, concurrency, async item => {
+                const rows = await pkVisualTimingMeasure(visualTiming, 'frameCapture', () => pkVisualMapConcurrent(candidateItems, concurrency, async item => {
                     return await pkVisualGetVideoFrameFingerprints(item, frameFractions, signal, null, item.name || '候选视频');
                 }, signal, (done, total) => {
-                    updateLoadTxt(`正在并发抽取关键帧 ${done}/${total} · ${concurrency} 路 · ${frameFractions.length} 帧`);
-                });
+                    updateLoadTxt(`视频精确验证：加载视频流 / 定位并读取关键帧 ${done}/${total} · ${concurrency} 路 · 每视频 ${frameFractions.length} 帧 · 时长容差 ${config.performance.durationToleranceSec}s/${config.performance.durationTolerancePct}%`);
+                }));
                 rows.forEach(captured => {
                     if (captured && captured.item && Array.isArray(captured.frames) && captured.frames.some(frame => frame && frame.hash)) {
                         capturedById.set(String(captured.item.id || ''), captured);
                     }
                 });
                 if (!S.scanning || signal.aborted || myScanId !== S.scanId) return;
-                videoEdges = await pkVisualRefineVideoCandidateEdges(candidateEdges, capturedById, config.threshold, signal, (done, total) => {
-                    if (total) updateLoadTxt(`正在比对关键帧候选 ${done}/${total} · ${frameFractions.length} 帧`);
-                }, minValidFrames);
+                videoEdges = await pkVisualTimingMeasure(visualTiming, 'frameCompare', () => pkVisualRefineVideoCandidateEdges(candidateEdges, capturedById, config.threshold, signal, (done, total) => {
+                    if (total) updateLoadTxt(`视频精确验证：本地计算并比对关键帧指纹 ${done}/${total} · 每视频 ${frameFractions.length} 帧`);
+                }, minValidFrames));
             }
         }
         if (!S.scanning || signal.aborted || myScanId !== S.scanId) return;
 
-        const groups = [
+        const groups = pkVisualTimingMeasureSync(visualTiming, 'groupBuild', () => [
             ...pkVisualEdgesToGroups(imageEdges, 'image', config.threshold),
             ...pkVisualEdgesToGroups(videoEdges, 'video', config.threshold)
-        ].sort((a, b) => (Number(b.visualScore) - Number(a.visualScore)) || (b.ids.length - a.ids.length));
+        ].sort((a, b) => (Number(b.visualScore) - Number(a.visualScore)) || (b.ids.length - a.ids.length)));
+        visualTiming.counts.groups = groups.length;
         if (!groups.length) {
-            showToast(L.msg_visual_none || '没有发现达到视觉相似阈值的重复资源', 'success', 4200);
+            visualTiming.counts.imageFingerprintFailed = imageFingerprintFailed;
+            visualTiming.counts.videoFingerprintFailed = videoFingerprintFailed;
+            const t = commitVisualTiming('no_match');
+            const failedTotal = imageFingerprintFailed + videoFingerprintFailed;
+            const validTotal = imageFingerprints.length + videoThumbnailFingerprints.length;
+            const suffix = failedTotal ? ` · 有效指纹 ${validTotal} · 缩略图失败 ${failedTotal}` : '';
+            showToast(`${L.msg_visual_none || '没有发现达到视觉相似阈值的重复资源'}${suffix} · 耗时 ${pkVisualFormatElapsed(t.totalMs)}`, failedTotal ? 'warning' : 'success', 5200);
             return;
         }
 
-        updateLoadTxt('正在分析重复组水印差异…');
-        try {
-            await pkVisualAnnotateWatermarks(groups, mediaItems, signal, (phase, done, total) => {
-                if (total) updateLoadTxt(phase === 'sample' ? `正在读取水印分析缩略图 ${done}/${total}` : `正在判断疑似水印 ${done}/${total}`);
-            });
-        } catch (e) {
-            if (e && e.name === 'AbortError') throw e;
-            console.warn('[PEM visual] watermark analysis skipped:', e);
+        if (config.performance.watermarkEnabled) {
+            updateLoadTxt(`正在分析重复组水印差异… · 并发${config.performance.watermarkConcurrency} · 每组最多${config.performance.watermarkPairBudget}对`);
+            try {
+                await pkVisualTimingMeasure(visualTiming, 'watermark', () => pkVisualAnnotateWatermarks(groups, mediaItems, signal, (phase, done, total) => {
+                    if (total) updateLoadTxt(phase === 'sample' ? `正在读取水印分析缩略图 ${done}/${total} · 并发${config.performance.watermarkConcurrency}` : `正在判断疑似水印 ${done}/${total}`);
+                }));
+            } catch (e) {
+                if (e && e.name === 'AbortError') throw e;
+                console.warn('[PEM visual] watermark analysis skipped:', e);
+            }
+        } else {
+            mediaItems.forEach(item => { if (!item) return; delete item._visualWatermark; delete item._visualWatermarkScore; delete item._visualWatermarkRegion; });
+            groups.forEach(group => { group._hasWatermark = false; group._watermarkCount = 0; });
         }
         if (!S.scanning || signal.aborted || myScanId !== S.scanId) return;
 
+        const renderTimingStart = pkVisualNow();
         S.dupReasons.clear();
         groups.forEach(group => {
             const label = group.visualKind === 'video' ? (L.tag_visual_video || '视觉视频') : (L.tag_visual_image || '视觉图片');
@@ -50971,6 +52140,10 @@ const runStandaloneVisualDedupe = async () => {
         S.visualDupConfig = { ...config };
         S.visualWatermarkOnly = false;
         if (UI.chkVisualWatermarkOnly) UI.chkVisualWatermarkOnly.checked = false;
+        S.visualFolderHighCoverageOnly = true;
+        if (UI.chkVisualFolderHighCov) UI.chkVisualFolderHighCov.checked = true;
+        S.dupSelectedGroupsOnly = false;
+        if (UI.chkDupSelectedOnly) UI.chkDupSelectedOnly.checked = false;
         S.dupGroupView = 'files';
         S.dupConfig = { video: config.videos, image: config.images, other: false, visual: true };
         S.dupResultSig = '';
@@ -51003,15 +52176,37 @@ const runStandaloneVisualDedupe = async () => {
 
         updateLoadTxt(L.str_rendering);
         S.display = [...S.items];
+        // Analysis is complete at this point. Enter result mode as a normal virtual
+        // view instead of asking refresh() to render while S.scanning is still true;
+        // several refresh branches deliberately behave differently during scans.
+        S.scanning = false;
+        syncLocalUploadVisibility();
         await refresh();
+        // Defensive fallback: a concurrent/background refresh must never leave a
+        // successfully-built visual result stranded on the previous page.
+        const hasResultHeader = Array.isArray(S.display) && S.display.some(row => row && row.isHeader);
+        if (!hasResultHeader && dupBuckets && Array.isArray(dupBuckets.all) && dupBuckets.all.length) {
+            S.dupMode = true;
+            S.visualDupMode = true;
+            S.dupRunning = false;
+            S.dupItemMap = dupItemMap;
+            S.dupBuckets = dupBuckets;
+            S.dupRawGroups = dupBuckets.all;
+            S._precomputedDupBuckets = null;
+            renderDupView();
+            updateStat();
+        }
+        visualTiming.stages.render = (Number(visualTiming.stages.render) || 0) + (pkVisualNow() - renderTimingStart);
+        const completedTiming = commitVisualTiming('done');
         if (S._enterTopRaf) cancelAnimationFrame(S._enterTopRaf);
         S._enterTopRaf = requestAnimationFrame(() => {
             S._enterTopRaf = 0;
             if (UI.vp && UI.vp.scrollTop !== 0) UI.vp.scrollTop = 0;
         });
-        showToast(`视觉去重完成：${groups.length} 组 · ${groups.reduce((sum, g) => sum + g.ids.length, 0)} 个资源`, 'success', 4200);
+        showToast(`视觉去重完成：${groups.length} 组 · ${groups.reduce((sum, g) => sum + g.ids.length, 0)} 个资源 · 耗时 ${pkVisualFormatElapsed(completedTiming.totalMs)}`, 'success', 5200);
     } catch (e) {
         if (!(e && e.name === 'AbortError') && myScanId === S.scanId) {
+            commitVisualTiming('failed');
             showAlert(`${L.str_error_crit}: ${String((e && e.message) || e || '视觉扫描失败')}`);
         }
     } finally {
@@ -51030,6 +52225,11 @@ if (UI.btnVisualDedupe) {
         if (e) { e.preventDefault(); e.stopPropagation(); }
         await runStandaloneVisualDedupe();
     };
+}
+if (UI.visualTimingBtn) {
+    UI.visualTimingBtn.onclick = e => { if (e) { e.preventDefault(); e.stopPropagation(); } pkVisualShowTimingModal(); };
+    const lastTiming = pkVisualLatestTiming();
+    UI.visualTimingBtn.textContent = lastTiming ? `耗时 ${pkVisualFormatElapsed(lastTiming.totalMs)}` : '耗时 --';
 }
 
 // 4.6.41: quick-select redundant duplicates in the same folder, with an optional
@@ -51064,19 +52264,57 @@ const dupSameFolderIsAncestor = (a, b) => {
     return true;
 };
 
+// Cross-level "same-folder extras" starts only BELOW My Pack.  A duplicate directly
+// in My Pack and another in My Pack/1 is intentionally NOT considered a chain, while
+// My Pack/1 and My Pack/1/2 is. Exact duplicates inside My Pack itself are still
+// eligible for the normal same-folder rule.
+const dupSameFolderRelativeDepth = info => {
+    let parts = info && Array.isArray(info.parts) ? info.parts.slice() : [];
+    const homeText = String(L.btn_nav_home || '').trim().toLocaleLowerCase();
+    if (parts.length && homeText && String(parts[0] || '').trim().toLocaleLowerCase() === homeText) parts.shift();
+    const sysName = String((CONF && CONF.SYSTEM_FOLDER_NAME) || 'My Pack').trim().toLocaleLowerCase();
+    const idx = parts.findIndex(part => String(part || '').trim().toLocaleLowerCase() === sysName);
+    if (idx >= 0) return Math.max(0, parts.length - idx - 1);
+    // Some result paths omit the literal "My Pack" segment; in that form the first
+    // visible directory already represents My Pack's first child.
+    return parts.length;
+};
+
+const dupSameFolderIsEligibleChainPair = (a, b) => {
+    let ancestor = null;
+    if (dupSameFolderIsAncestor(a, b)) ancestor = a;
+    else if (dupSameFolderIsAncestor(b, a)) ancestor = b;
+    if (!ancestor) return false;
+    return dupSameFolderRelativeDepth(ancestor) >= 1;
+};
+
 const showDupSameFolderOptions = () => new Promise(resolve => {
     const m = showModal(`
         <h3 style="border:none;margin-bottom:4px;font-size:18px;font-weight:700;color:var(--pk-fg);">${L.btn_dup_same_folder_extras || '同夹多余'}</h3>
         <div style="font-size:12px;line-height:1.65;color:var(--pk-fg);opacity:.72;margin-bottom:2px;">
-            默认只处理完全相同的所在目录。启用“包含子文件夹”后，只把真实父目录→子目录链一起判断；兄弟目录不会互相命中。
+            默认只处理完全相同的所在目录。可选择“智能保留（无水印优先，其次最大）”或“保留最大文件”。启用“包含子文件夹”后，只把真实父目录→子目录链一起判断；兄弟目录不会互相命中。
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border:1px solid var(--pk-bd);border-radius:8px;cursor:pointer;">
+                <input type="radio" name="pk-dup-same-folder-rule" value="smart" checked style="margin-top:2px;accent-color:var(--pk-pri);">
+                <span style="min-width:0;"><b style="display:block;font-size:13px;color:var(--pk-fg);">智能保留</b><span style="display:block;margin-top:2px;font-size:11px;color:var(--pk-fg);opacity:.66;">无水印优先，其次保留最大的</span></span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border:1px solid var(--pk-bd);border-radius:8px;cursor:pointer;">
+                <input type="radio" name="pk-dup-same-folder-rule" value="largest" style="margin-top:2px;accent-color:var(--pk-pri);">
+                <span style="min-width:0;"><b style="display:block;font-size:13px;color:var(--pk-fg);">保留最大文件</b><span style="display:block;margin-top:2px;font-size:11px;color:var(--pk-fg);opacity:.66;">忽略水印优先级，始终先按文件大小保留</span></span>
+            </label>
         </div>
         <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--pk-bd);border-radius:8px;background:var(--pk-bg);cursor:pointer;">
             <span style="font-size:13px;font-weight:700;color:var(--pk-fg);">包含子文件夹（父子目录链）</span>
             <input type="checkbox" id="pk-dup-same-folder-children" style="width:16px;height:16px;accent-color:var(--pk-pri);">
         </label>
-        <div id="pk-dup-same-folder-depth-box" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;opacity:.45;pointer-events:none;">
+        <div id="pk-dup-same-folder-depth-box" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;opacity:.45;pointer-events:none;">
             <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border:1px solid var(--pk-bd);border-radius:8px;cursor:pointer;">
-                <input type="radio" name="pk-dup-same-folder-depth" value="shallow" checked style="margin-top:2px;accent-color:var(--pk-pri);">
+                <input type="radio" name="pk-dup-same-folder-depth" value="smart" checked style="margin-top:2px;accent-color:var(--pk-pri);">
+                <span style="min-width:0;"><b style="display:block;font-size:13px;color:var(--pk-fg);">跨层智能保留</b><span style="display:block;margin-top:2px;font-size:11px;color:var(--pk-fg);opacity:.66;">整条父子链按上方副本规则只留最佳项</span></span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border:1px solid var(--pk-bd);border-radius:8px;cursor:pointer;">
+                <input type="radio" name="pk-dup-same-folder-depth" value="shallow" style="margin-top:2px;accent-color:var(--pk-pri);">
                 <span style="min-width:0;"><b style="display:block;font-size:13px;color:var(--pk-fg);">保留较浅层</b><span style="display:block;margin-top:2px;font-size:11px;color:var(--pk-fg);opacity:.66;">勾选更深层的重复副本</span></span>
             </label>
             <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border:1px solid var(--pk-bd);border-radius:8px;cursor:pointer;">
@@ -51085,7 +52323,7 @@ const showDupSameFolderOptions = () => new Promise(resolve => {
             </label>
         </div>
         <div style="padding:8px 10px;border-radius:7px;background:var(--pk-hl);font-size:11px;line-height:1.6;color:var(--pk-fg);opacity:.76;">
-            例：/a/a.mp4 与 /a/b/a.mp4。保留较浅层会勾选 /a/b/a.mp4；保留较深层则勾选 /a/a.mp4。
+            跨层判断至少从 My Pack 的一级子目录开始：My Pack/a.mp4 与 My Pack/1/a.mp4 不算；My Pack/1/a.mp4 与 My Pack/1/2/a.mp4 可以。跨层智能保留不依赖深浅，直接按上方规则选择最佳副本。
         </div>
         <div class="pk-modal-act">
             <button class="pk-btn" id="pk-dup-same-folder-cancel">${L.btn_cancel || '取消'}</button>
@@ -51093,7 +52331,7 @@ const showDupSameFolderOptions = () => new Promise(resolve => {
         </div>
     `);
     const box = m.querySelector('.pk-modal');
-    if (box) Object.assign(box.style, { width: '500px', padding: '26px' });
+    if (box) Object.assign(box.style, { width: '560px', padding: '26px' });
     const childBox = m.querySelector('#pk-dup-same-folder-children');
     const depthBox = m.querySelector('#pk-dup-same-folder-depth-box');
     const syncDepth = () => {
@@ -51110,8 +52348,10 @@ const showDupSameFolderOptions = () => new Promise(resolve => {
     if (cancel) cancel.onclick = () => finish(null);
     const apply = m.querySelector('#pk-dup-same-folder-apply');
     if (apply) apply.onclick = () => {
-        const depth = m.querySelector('input[name="pk-dup-same-folder-depth"]:checked')?.value === 'deep' ? 'deep' : 'shallow';
-        finish({ includeChildren: !!(childBox && childBox.checked), keepDepth: depth });
+        const depthRaw = m.querySelector('input[name="pk-dup-same-folder-depth"]:checked')?.value || 'smart';
+        const depth = depthRaw === 'deep' ? 'deep' : (depthRaw === 'shallow' ? 'shallow' : 'smart');
+        const keepRule = m.querySelector('input[name="pk-dup-same-folder-rule"]:checked')?.value === 'largest' ? 'largest' : 'smart';
+        finish({ includeChildren: !!(childBox && childBox.checked), keepDepth: depth, keepRule });
     };
     const close = m.querySelector('.pk-modal-close');
     if (close) close.onclick = () => finish(null);
@@ -51119,11 +52359,37 @@ const showDupSameFolderOptions = () => new Promise(resolve => {
 
 const collectDupSameFolderExtras = options => {
     const includeChildren = !!(options && options.includeChildren);
-    const keepDepth = options && options.keepDepth === 'deep' ? 'deep' : 'shallow';
+    const keepDepth = options && options.keepDepth === 'deep' ? 'deep' : (options && options.keepDepth === 'shallow' ? 'shallow' : 'smart');
+    const keepRule = options && options.keepRule === 'largest' ? 'largest' : 'smart';
     const selectedIds = [];
     const selectedSeen = new Set();
     let groupHits = 0;
     let members = [];
+    let currentHeader = null;
+    (Array.isArray(S.dupRawGroups)?S.dupRawGroups:[]).forEach(g=>{ if(g){delete g._sameFolderNeedsReview;delete g._sameFolderReviewKeeperIds;} });
+    const allItems = S.dupItemMap instanceof Map ? S.dupItemMap : S.itemMap;
+    if (allItems && typeof allItems.forEach === 'function') allItems.forEach(it=>{ if(it) delete it._sameFolderReviewKeeper; });
+    const chooseKeeper = items => (items || []).slice().sort((a,b)=>{
+        const aw=a&&a._visualWatermark?1:0, bw=b&&b._visualWatermark?1:0;
+        let as=0n,bs=0n; try{as=BigInt(a&&a.size||0);}catch(e){} try{bs=BigInt(b&&b.size||0);}catch(e){}
+        if (keepRule === 'largest') {
+            if(as!==bs)return as>bs?-1:1;
+            // Same size is a true tie: prefer a known clean copy.
+            if(aw!==bw)return aw-bw;
+        } else {
+            if(aw!==bw)return aw-bw;
+            if(as!==bs)return as>bs?-1:1;
+        }
+        return String(a&&a.name||'').localeCompare(String(b&&b.name||''),undefined,{numeric:true,sensitivity:'base'});
+    })[0] || null;
+    const markReviewIfNeeded = keeper => {
+        if(!keeper || !keeper._visualWatermark)return;
+        keeper._sameFolderReviewKeeper=true;
+        const ids=currentHeader&&Array.isArray(currentHeader.groupIds)?currentHeader.groupIds:members.map(it=>it&&it.id).filter(Boolean);
+        const key=ids.map(String).sort().join('\u0000');
+        const g=(Array.isArray(S.dupRawGroups)?S.dupRawGroups:[]).find(row=>row&&Array.isArray(row.ids)&&row.ids.map(String).sort().join('\u0000')===key);
+        if(g){g._sameFolderNeedsReview=true;g._sameFolderReviewKeeperIds=Array.from(new Set([...(g._sameFolderReviewKeeperIds||[]),String(keeper.id)]));}
+    };
 
     const selectItem = item => {
         const id = item && item.id;
@@ -51156,7 +52422,8 @@ const collectDupSameFolderExtras = options => {
         if (!includeChildren) {
             nodes.forEach(node => {
                 if (node.items.length < 2) return;
-                for (let i = 1; i < node.items.length; i++) if (selectItem(node.items[i])) hitThisGroup = true;
+                const keeper=chooseKeeper(node.items); markReviewIfNeeded(keeper);
+                node.items.forEach(item=>{ if(!keeper || String(item.id)!==String(keeper.id)) if(selectItem(item)) hitThisGroup=true; });
             });
             if (hitThisGroup) groupHits++;
             members = [];
@@ -51172,7 +52439,7 @@ const collectDupSameFolderExtras = options => {
         const unite = (a, b) => { a = find(a); b = find(b); if (a !== b) parent[b] = a; };
         for (let i = 0; i < nodes.length; i++) {
             for (let j = i + 1; j < nodes.length; j++) {
-                if (dupSameFolderIsAncestor(nodes[i], nodes[j]) || dupSameFolderIsAncestor(nodes[j], nodes[i])) unite(i, j);
+                if (dupSameFolderIsEligibleChainPair(nodes[i], nodes[j])) unite(i, j);
             }
         }
         const comps = new Map();
@@ -51189,23 +52456,34 @@ const collectDupSameFolderExtras = options => {
             const hasSameFolderExtras = comp.some(node => node.items.length > 1);
             if (!hasChain && !hasSameFolderExtras) return;
 
-            const keepNodes = new Set();
-            comp.forEach(node => {
-                const hasAncestorNode = comp.some(other => other !== node && dupSameFolderIsAncestor(other, node));
-                const hasDescendantNode = comp.some(other => other !== node && dupSameFolderIsAncestor(node, other));
-                if (keepDepth === 'deep' ? !hasDescendantNode : !hasAncestorNode) keepNodes.add(node);
-            });
+            if (hasChain && keepDepth === 'smart') {
+                // 4.6.49: cross-level smart mode ignores shallow/deep position and
+                // chooses exactly one best copy from the eligible directory chain.
+                const chainItems = comp.flatMap(node => node.items || []);
+                const keeper = chooseKeeper(chainItems);
+                markReviewIfNeeded(keeper);
+                chainItems.forEach(item => {
+                    if (!keeper || String(item.id) !== String(keeper.id)) {
+                        if (selectItem(item)) hitThisGroup = true;
+                    }
+                });
+            } else {
+                const keepNodes = new Set();
+                comp.forEach(node => {
+                    const hasAncestorNode = comp.some(other => other !== node && dupSameFolderIsEligibleChainPair(other, node));
+                    const hasDescendantNode = comp.some(other => other !== node && dupSameFolderIsEligibleChainPair(node, other));
+                    if (keepDepth === 'deep' ? !hasDescendantNode : !hasAncestorNode) keepNodes.add(node);
+                });
 
-            comp.forEach(node => {
-                if (keepNodes.has(node)) {
-                    // Keep one representative in every terminal folder. If there are
-                    // multiple duplicates in that exact folder, preserve the first row
-                    // and select the rest according to the current in-group ordering.
-                    for (let i = 1; i < node.items.length; i++) if (selectItem(node.items[i])) hitThisGroup = true;
-                } else {
-                    node.items.forEach(item => { if (selectItem(item)) hitThisGroup = true; });
-                }
-            });
+                comp.forEach(node => {
+                    if (keepNodes.has(node)) {
+                        const keeper=chooseKeeper(node.items); markReviewIfNeeded(keeper);
+                        node.items.forEach(item=>{ if(!keeper || String(item.id)!==String(keeper.id)) if(selectItem(item)) hitThisGroup=true; });
+                    } else {
+                        node.items.forEach(item => { if (selectItem(item)) hitThisGroup = true; });
+                    }
+                });
+            }
         });
 
         if (hitThisGroup) groupHits++;
@@ -51214,7 +52492,7 @@ const collectDupSameFolderExtras = options => {
 
     (Array.isArray(S.display) ? S.display : []).forEach(item => {
         if (!item) return;
-        if (item.isHeader) flush();
+        if (item.isHeader) { flush(); currentHeader=item; }
         else members.push(item);
     });
     flush();
@@ -51237,9 +52515,11 @@ UI.btnDupSameFolder.onclick = async (e) => {
         return;
     }
     S.setExplicitSelection(result.selectedIds);
-    renderVisible();
+    renderDupView();
     updateStat();
-    const suffix = options.includeChildren ? ` · ${options.keepDepth === 'deep' ? '保留较深层' : '保留较浅层'}` : '';
+    const reviewCount=(Array.isArray(S.dupRawGroups)?S.dupRawGroups:[]).filter(g=>g&&g._sameFolderNeedsReview).length;
+    const chainLabel = options.keepDepth === 'deep' ? '保留较深层' : (options.keepDepth === 'shallow' ? '保留较浅层' : '跨层智能保留');
+    const suffix = ` · ${options.keepRule === 'largest' ? '保留最大' : '无水印优先'}` + (options.includeChildren ? ` · ${chainLabel}` : '') + (reviewCount ? ` · ${reviewCount} 组待人工确认` : '');
     showToast(L.msg_dup_same_folder_result.replace('{groups}', result.groupHits).replace('{items}', result.selectedIds.length) + suffix, 'success', 4200);
 };
 }
@@ -51646,6 +52926,9 @@ const executeDupMergePlan = async choice => {
             if (typeof globalParentIndex !== 'undefined') globalParentIndex.set(String(keeper.id), { id: targetId, name: op.target.name || '' });
         });
 
+        // Reconcile all live duplicate/search rows against each keeper's new parent.
+        keeperOps.forEach(op => patchLiveResultStateAfterMove([op.keeper], op.target.id, op.target.name || ''));
+
         if (typeof folderDetailedScanCacheInvalidate === 'function') {
             folderDetailedScanCacheInvalidate(Array.from(touchedFolders).map(normalizeRealFolderId));
         }
@@ -51673,6 +52956,7 @@ const executeDupMergePlan = async choice => {
             renderDupView();
             updateStat();
         }
+        persistCurrentResultAfterMutation();
         showToast((L.msg_dup_merge_done || '副本合并完成：处理 {groups} 组，保留 {keepers} 个，删除 {deleted} 个副本')
             .replace('{groups}', choice.groups.length)
             .replace('{keepers}', keeperOps.length)
@@ -51711,6 +52995,20 @@ UI.btnDupGroupMode.onclick = e => {
 };
 }
 
+if (UI.btnDupBackFiles) {
+UI.btnDupBackFiles.onclick = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!S.dupMode || S.dupGroupView !== 'folders') return;
+    S.dupGroupView = 'files';
+    syncDupGroupViewControls();
+    clearGroupedGridMetaCache();
+    clearGridStableRows(UI.in);
+    renderDupView();
+    void saveResultHistorySnapshot(S.visualDupMode ? 'visual_dup' : 'file_dup');
+};
+}
+
 if (UI.btnDupMerge) {
 UI.btnDupMerge.onclick = async e => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -51729,6 +53027,252 @@ UI.btnDupMerge.onclick = async e => {
     await executeDupMergePlan(choice);
 };
 }
+
+
+// ===== 4.6.57 duplicate-result path exclusion =====
+// Pick exactly two duplicate rows as representatives of two folder trees.  The
+// current *visible* duplicate groups are then used as the matching evidence:
+// every target-side member whose group also contains a reference-side member is
+// a delete candidate.  This works for exact/name/sim file results and for visual
+// duplicate groups without introducing another expensive full-content scan.
+const dupExcludeFolderKey = id => normalizeRealFolderId(id);
+
+const dupExcludeFolderInfoFromItem = item => {
+    const target = getDupMergeItemTarget(item);
+    if (!target) return null;
+    return { ...target, id: dupExcludeFolderKey(target.id), fullPath: String(target.fullPath || getDupMergeDisplayPath(item) || L.btn_nav_home || '主页') };
+};
+
+const dupExcludeIsFolderInside = (childId, ancestorId) => {
+    const child = dupExcludeFolderKey(childId), ancestor = dupExcludeFolderKey(ancestorId);
+    if (!ancestor) return true;
+    if (!child) return false;
+    if (child === ancestor) return true;
+    const seen = new Set();
+    let cur = child;
+    for (let guard = 0; guard < 96 && cur && !seen.has(cur); guard++) {
+        seen.add(cur);
+        const parent = (typeof globalParentIndex !== 'undefined' && globalParentIndex) ? globalParentIndex.get(cur) : null;
+        cur = dupExcludeFolderKey(parent && parent.id);
+        if (cur === ancestor) return true;
+    }
+    return false;
+};
+
+const dupExcludeFoldersNested = (a, b) => {
+    const aa = dupExcludeFolderKey(a), bb = dupExcludeFolderKey(b);
+    if (aa === bb) return true;
+    return dupExcludeIsFolderInside(aa, bb) || dupExcludeIsFolderInside(bb, aa);
+};
+
+const dupExcludeItemInFolder = (item, folderId) => {
+    if (!item || item.kind === 'drive#folder') return false;
+    const target = dupExcludeFolderKey(folderId);
+    if (!target) return true;
+    let parent = dupExcludeFolderKey(item.parent_id);
+    if (parent === target) return true;
+    if (Array.isArray(item._lineage) && item._lineage.some(node => dupExcludeFolderKey(node && node.id) === target)) return true;
+    const seen = new Set();
+    for (let guard = 0; guard < 96 && parent && !seen.has(parent); guard++) {
+        seen.add(parent);
+        const p = (typeof globalParentIndex !== 'undefined' && globalParentIndex) ? globalParentIndex.get(parent) : null;
+        parent = dupExcludeFolderKey(p && p.id);
+        if (parent === target) return true;
+    }
+    return false;
+};
+
+const dupExcludeVisibleGroups = () => {
+    const groups = [];
+    const seen = new Set();
+    (Array.isArray(S.display) ? S.display : []).forEach(row => {
+        if (!row || !row.isHeader || !Array.isArray(row.groupIds) || row.groupIds.length < 2) return;
+        const ids = row.groupIds.map(String).filter(Boolean);
+        const key = ids.slice().sort().join('\u0000');
+        if (!key || seen.has(key)) return;
+        seen.add(key); groups.push(ids);
+    });
+    // Defensive fallback for a result renderer that has not rebuilt headers yet.
+    if (!groups.length && Array.isArray(S.dupRawGroups)) {
+        S.dupRawGroups.forEach(g => {
+            const ids = (g && Array.isArray(g.ids) ? g.ids : []).map(String).filter(Boolean);
+            if (ids.length < 2) return;
+            const key = ids.slice().sort().join('\u0000');
+            if (!key || seen.has(key)) return;
+            seen.add(key); groups.push(ids);
+        });
+    }
+    return groups;
+};
+
+const dupExcludeScopeStats = folderId => {
+    let bytes = 0n, files = 0;
+    (Array.isArray(S.items) ? S.items : []).forEach(item => {
+        if (!item || item.kind === 'drive#folder' || !dupExcludeItemInFolder(item, folderId)) return;
+        files++;
+        try { bytes += BigInt(item.size || 0); } catch (e) { bytes += BigInt(Math.max(0, Number(item.size) || 0)); }
+    });
+    return { bytes, files };
+};
+
+const buildDupPathExcludePlan = (folderA, folderB) => {
+    if (!folderA || !folderB || dupExcludeFoldersNested(folderA.id, folderB.id)) return null;
+    const itemMap = S.dupItemMap instanceof Map ? S.dupItemMap : S.itemMap;
+    const targetHits = new Map(), referenceHits = new Map(), targetToRefs = new Map();
+    let matchedGroups = 0;
+    dupExcludeVisibleGroups().forEach(ids => {
+        const members = ids.map(id => itemMap && itemMap.get(id)).filter(item => item && item.kind !== 'drive#folder');
+        const targets = members.filter(item => dupExcludeItemInFolder(item, folderA.id));
+        const refs = members.filter(item => dupExcludeItemInFolder(item, folderB.id));
+        if (!targets.length || !refs.length) return;
+        matchedGroups++;
+        refs.forEach(item => referenceHits.set(String(item.id), item));
+        targets.forEach(item => {
+            const id = String(item.id || ''); if (!id) return;
+            targetHits.set(id, item);
+            let set = targetToRefs.get(id); if (!set) { set = new Set(); targetToRefs.set(id, set); }
+            refs.forEach(ref => { if (ref && ref.id) set.add(String(ref.id)); });
+        });
+    });
+    let deleteBytes = 0n;
+    targetHits.forEach(item => { try { deleteBytes += BigInt(item.size || 0); } catch (e) {} });
+    const targetTotal = dupExcludeScopeStats(folderA.id);
+    const referenceTotal = dupExcludeScopeStats(folderB.id);
+    return {
+        target: folderA, reference: folderB,
+        targetTotal, referenceTotal,
+        targetHits, referenceHits, targetToRefs,
+        matchedGroups, deleteFiles: Array.from(targetHits.values()), deleteBytes
+    };
+};
+
+const showDupPathExcludePreview = (folderA, folderB) => new Promise(resolve => {
+    let target = folderA, reference = folderB;
+    const statA = dupExcludeScopeStats(folderA.id), statB = dupExcludeScopeStats(folderB.id);
+    // Default to removing from the larger collection. Direction remains explicit
+    // and can be swapped with one click before execution.
+    if (statB.bytes > statA.bytes || (statB.bytes === statA.bytes && statB.files > statA.files)) {
+        target = folderB; reference = folderA;
+    }
+    let currentPlan = buildDupPathExcludePlan(target, reference);
+    const m = showModal(`
+        <h3>按路径剔除匹配副本</h3>
+        <div style="font-size:12px;line-height:1.55;color:var(--pk-fg);opacity:.72;margin-bottom:12px;">以当前${S.visualDupMode ? '视觉相似' : '文件匹配'}结果为依据，从“剔除路径”删除在“参照路径”中已有的相似或相同副本。仅处理当前可见匹配组。</div>
+        <div id="pk-dup-exclude-paths" style="display:grid;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr);gap:8px;align-items:stretch;"></div>
+        <div id="pk-dup-exclude-summary" style="margin-top:12px;"></div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;margin-top:14px;cursor:pointer;font-weight:700;"><input id="pk-dup-exclude-confirm" type="checkbox" style="margin-top:2px;accent-color:var(--pk-pri);"><span>我确认：只删除“剔除路径”中的命中文件，“参照路径”保持不变</span></label>
+        <div class="pk-modal-act" style="margin-top:18px;"><button class="pk-btn" id="pk-dup-exclude-cancel">${L.btn_cancel}</button><button class="pk-btn pri" id="pk-dup-exclude-run" disabled style="background:var(--pk-pri);color:#fff;opacity:.5;">确认剔除到回收站</button></div>
+    `);
+    const box = m.querySelector('.pk-modal'); if (box) box.style.width = 'min(780px,94vw)';
+    const paths = m.querySelector('#pk-dup-exclude-paths'), summary = m.querySelector('#pk-dup-exclude-summary');
+    const confirm = m.querySelector('#pk-dup-exclude-confirm'), run = m.querySelector('#pk-dup-exclude-run');
+    const pct = (n,d) => d > 0 ? `${Math.round((n/d)*1000)/10}%` : '0%';
+    const card = (label, folder, total, hits, danger) => `<div style="border:1px solid ${danger?'rgba(217,48,37,.38)':'var(--pk-bd)'};border-radius:9px;padding:10px;background:${danger?'rgba(217,48,37,.035)':'var(--pk-bg)'};min-width:0;">
+        <div style="font-size:11px;font-weight:800;color:${danger?'#d93025':'var(--pk-pri)'};margin-bottom:5px;">${label}</div>
+        <div class="pk-force-tip" data-pk-tip="${esc(folder.fullPath)}" style="font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(folder.fullPath)}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px;">
+            <div><div style="font-size:10px;opacity:.58;">大小</div><div style="font-size:13px;font-weight:800;">${fmtSize(total.bytes.toString())}</div></div>
+            <div><div style="font-size:10px;opacity:.58;">文件</div><div style="font-size:13px;font-weight:800;">${total.files}</div></div>
+            <div><div style="font-size:10px;opacity:.58;">命中</div><div style="font-size:13px;font-weight:800;color:var(--pk-pri);">${hits} <span style="font-size:10px;opacity:.6;">(${pct(hits,total.files)})</span></div></div>
+        </div></div>`;
+    const render = () => {
+        currentPlan = buildDupPathExcludePlan(target, reference);
+        const p = currentPlan;
+        if (!p) { summary.innerHTML = '<div style="padding:10px;color:#d93025;">两个路径不能相同，也不能存在父子包含关系。</div>'; return; }
+        paths.innerHTML = `${card('从此路径剔除', target, p.targetTotal, p.targetHits.size, true)}
+            <button type="button" id="pk-dup-exclude-swap" class="pk-btn" data-pk-tip="交换剔除路径和参照路径" style="align-self:center;width:42px;height:34px;padding:0;font-size:18px;border:1px solid var(--pk-bd);">⇄</button>
+            ${card('参照路径', reference, p.referenceTotal, p.referenceHits.size, false)}`;
+        summary.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;">
+            <div style="border:1px solid var(--pk-bd);border-radius:8px;padding:8px 9px;"><div style="font-size:10px;opacity:.6;">命中匹配组</div><div style="font-size:15px;font-weight:800;color:var(--pk-pri);">${p.matchedGroups}</div></div>
+            <div style="border:1px solid var(--pk-bd);border-radius:8px;padding:8px 9px;"><div style="font-size:10px;opacity:.6;">将删除</div><div style="font-size:15px;font-weight:800;color:#d93025;">${p.deleteFiles.length} 文件</div></div>
+            <div style="border:1px solid var(--pk-bd);border-radius:8px;padding:8px 9px;"><div style="font-size:10px;opacity:.6;">预计释放</div><div style="font-size:15px;font-weight:800;color:#d93025;">${fmtSize(p.deleteBytes.toString())}</div></div>
+        </div>`;
+        const swap = paths.querySelector('#pk-dup-exclude-swap'); if (swap) swap.onclick = () => { const t=target; target=reference; reference=t; render(); };
+        run.disabled = !confirm.checked || !p.deleteFiles.length; run.style.opacity = run.disabled ? '.5' : '1';
+    };
+    confirm.onchange = render; render();
+    const finish = value => { m.remove(); resolve(value); };
+    m.querySelector('#pk-dup-exclude-cancel').onclick = () => finish(null);
+    const close = m.querySelector('.pk-modal-close'); if (close) close.onclick = () => finish(null);
+    run.onclick = () => { if (!run.disabled && currentPlan) finish(currentPlan); };
+});
+
+const executeDupPathExclude = async plan => {
+    if (!plan || !plan.deleteFiles || !plan.deleteFiles.length) return;
+    const progress = FloatBarManager.create('正在校验路径剔除…');
+    isGUISensitive = true;
+    try {
+        // Re-check that each target is still inside the target tree and that at
+        // least one matching reference copy is still alive inside the reference
+        // tree.  Folder ancestors are fetched lazily and shared across candidates.
+        const metaCache = new Map();
+        const getMeta = async id => {
+            const key = String(id || ''); if (!key) return null;
+            if (metaCache.has(key)) return metaCache.get(key);
+            const value = await apiGet(key).catch(() => null); metaCache.set(key, value); return value;
+        };
+        const liveInside = async (fileMeta, folderId) => {
+            const target = dupExcludeFolderKey(folderId); if (!target) return true;
+            let cur = dupExcludeFolderKey(fileMeta && fileMeta.parent_id); const seen = new Set();
+            for (let guard=0; guard<96 && cur && !seen.has(cur); guard++) {
+                if (cur === target) return true; seen.add(cur);
+                const parentMeta = await getMeta(cur); cur = dupExcludeFolderKey(parentMeta && parentMeta.parent_id);
+            }
+            return false;
+        };
+        const validDeletes = [], skipped = [];
+        let checked = 0;
+        for (const item of plan.deleteFiles) {
+            progress.update(`正在实时校验 ${++checked}/${plan.deleteFiles.length}`);
+            const meta = await getMeta(item.id);
+            if (!meta || meta.trashed || !(await liveInside(meta, plan.target.id))) { skipped.push(item); continue; }
+            const refIds = Array.from(plan.targetToRefs.get(String(item.id)) || []);
+            let hasLiveRef = false;
+            for (const refId of refIds) {
+                const refMeta = await getMeta(refId);
+                if (refMeta && !refMeta.trashed && await liveInside(refMeta, plan.reference.id)) { hasLiveRef = true; break; }
+            }
+            if (hasLiveRef) validDeletes.push(item); else skipped.push(item);
+        }
+        if (!validDeletes.length) { showToast('实时校验后没有可安全剔除的命中文件', 'warning', 4600); return; }
+        progress.update(`正在剔除 ${validDeletes.length} 个命中文件…`);
+        await executeBatchDelete(validDeletes.map(item => item.id), {
+            silent: true, explicitItems: validDeletes,
+            originPathId: 'file_dup', originPathDepth: 1, suppressVirtualRootRefresh: true
+        });
+        [plan.target.id, plan.reference.id].forEach(id => {
+            const fid = dupExcludeFolderKey(id);
+            if (window.pkGlobalIndex && typeof window.pkGlobalIndex.markDirty === 'function') window.pkGlobalIndex.markDirty(fid);
+            if (typeof scheduleRealFolderRevalidation === 'function') scheduleRealFolderRevalidation(fid, 300);
+        });
+        S.clearSelection();
+        if (S.dupMode) { renderDupView(); updateStat(); }
+        persistCurrentResultAfterMutation();
+        let bytes = 0n; validDeletes.forEach(item => { try { bytes += BigInt(item.size || 0); } catch(e) {} });
+        showToast(`路径剔除完成：删除 ${validDeletes.length} 个文件，释放约 ${fmtSize(bytes.toString())}${skipped.length ? ` · ${skipped.length} 个因路径变化被跳过` : ''}`, skipped.length ? 'warning' : 'success', 6000);
+    } catch (e) {
+        showAlert(`${L.str_error || '错误'}: ${formatCloudErrorMessage(e)}`, '按路径剔除匹配副本');
+    } finally {
+        if (progress) progress.destroy(); isGUISensitive = false; scheduleBackgroundResume();
+    }
+};
+
+if (UI.btnDupExclude) UI.btnDupExclude.onclick = async e => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (!S.dupMode || S.dupGroupView === 'folders') return;
+    const ids = S.getSelectedIds ? S.getSelectedIds().filter(Boolean) : [];
+    if (ids.length !== 2) { showToast('请在匹配结果中恰好勾选 2 个文件，用它们确定两个路径', 'warning', 4400); return; }
+    const itemMap = S.dupItemMap instanceof Map ? S.dupItemMap : S.itemMap;
+    const items = ids.map(id => itemMap && itemMap.get(id)).filter(item => item && item.kind !== 'drive#folder');
+    if (items.length !== 2) { showToast('剔除只支持勾选两个文件，不能选择文件夹统计行', 'warning', 4400); return; }
+    const folders = items.map(dupExcludeFolderInfoFromItem);
+    if (!folders[0] || !folders[1] || folders[0].id === folders[1].id) { showToast('两个文件必须来自不同路径', 'warning', 4400); return; }
+    if (dupExcludeFoldersNested(folders[0].id, folders[1].id)) { showAlert('两个路径存在父子包含关系。为避免把参照路径中的文件误删，只允许选择彼此独立的两个路径。', '按路径剔除匹配副本'); return; }
+    const plan = await showDupPathExcludePreview(folders[0], folders[1]); if (!plan) return;
+    if (!plan.deleteFiles.length) { showToast('这两个路径在当前可见匹配结果中没有可剔除的交叉命中', 'warning', 4600); return; }
+    await executeDupPathExclude(plan);
+};
+// ===== End 4.6.57 duplicate-result path exclusion =====
 
 
 // ===== 4.6.38 Merge folders containing checked duplicate files =====
@@ -51811,27 +53355,17 @@ const resolveDupFolderMergePath = (catalog, rawPath) => {
 };
 
 const collectSelectedDupFolderMergeComponents = () => {
-    // Build folder relations from the actually-visible duplicate groups.  A relation
-    // exists only when at least two CHECKED members of one duplicate group live in
-    // different directories. Connected directory relations become one default plan.
-    const relations = [];
-    let current = null;
-    const flush = () => {
-        if (!current) return;
-        if (current.items.length >= 2) relations.push(current);
-        current = null;
-    };
-    (Array.isArray(S.display) ? S.display : []).forEach(row => {
-        if (!row) return;
-        if (row.isHeader) {
-            flush();
-            current = { title: String(row.name || row.type || '重复组'), items: [] };
-            return;
-        }
-        if (!current || !row.id || row.kind === 'drive#folder') return;
-        if (S.isSelected(row.id)) current.items.push(row);
+    // 4.6.43: derive relations from the original duplicate groups instead of the
+    // current rendered rows. This also lets the visual folder-relation view select
+    // folder rows and immediately invoke "合并所在文件夹".
+    const selectedSet=new Set((S.getSelectedIds?S.getSelectedIds():[]).map(String));
+    const itemMap=S.dupItemMap instanceof Map?S.dupItemMap:S.itemMap;
+    const relations=[];
+    const rawGroups=Array.isArray(S.dupRawGroups)?S.dupRawGroups:[];
+    rawGroups.forEach((g,idx)=>{
+        const items=(g&&g.ids||[]).map(id=>itemMap&&itemMap.get(id)).filter(it=>it&&selectedSet.has(String(it.id))&&it.kind!=='drive#folder');
+        if(items.length>=2)relations.push({title:String(g&&g.type||`重复组 ${idx+1}`),items});
     });
-    flush();
 
     const folderMap = new Map();
     const graph = new Map();
@@ -51841,61 +53375,22 @@ const collectSelectedDupFolderMergeComponents = () => {
         const id = normalizeRealFolderId(info.id);
         let row = folderMap.get(id);
         if (!row) {
-            row = {
-                id,
-                name: info.name || (id ? id : (L.btn_nav_home || 'Root')),
-                path: Array.isArray(info.path) ? info.path.map(n => ({ id: String(n && n.id || ''), name: String(n && n.name || '') })) : [],
-                fullPath: String(info.fullPath || getDupMergeDisplayPath(item) || ''),
-                folderBytes: 0n,
-                selectedBytes: 0n,
-                selectedIds: new Set(),
-                relationTitles: new Set()
-            };
-            folderMap.set(id, row);
-            graph.set(id, new Set());
+            row = { id, name: info.name || (id ? id : (L.btn_nav_home || 'Root')), path: Array.isArray(info.path) ? info.path.map(n => ({ id: String(n && n.id || ''), name: String(n && n.name || '') })) : [], fullPath: String(info.fullPath || getDupMergeDisplayPath(item) || ''), folderBytes: 0n, selectedBytes: 0n, selectedIds: new Set(), relationTitles: new Set() };
+            folderMap.set(id, row); graph.set(id, new Set());
         }
-        try {
-            const metaBytes = BigInt(item && item._dupFolderMeta && item._dupFolderMeta.size || 0);
-            if (metaBytes > row.folderBytes) row.folderBytes = metaBytes;
-        } catch (e) {}
+        try { const metaBytes = BigInt(item && item._dupFolderMeta && item._dupFolderMeta.size || 0); if (metaBytes > row.folderBytes) row.folderBytes = metaBytes; } catch (e) {}
         try { row.selectedBytes += BigInt(item && item.size || 0); } catch (e) {}
-        row.selectedIds.add(String(item.id || ''));
-        if (relTitle) row.relationTitles.add(relTitle);
-        return row;
+        row.selectedIds.add(String(item.id || '')); if (relTitle) row.relationTitles.add(relTitle); return row;
     };
-
     relations.forEach(rel => {
-        const ids = [];
-        rel.items.forEach(item => {
-            const folder = touchFolder(item, rel.title);
-            if (folder && !ids.includes(folder.id)) ids.push(folder.id);
-        });
-        if (ids.length < 2) return;
-        const hub = ids[0];
-        for (let i = 1; i < ids.length; i++) {
-            graph.get(hub).add(ids[i]);
-            graph.get(ids[i]).add(hub);
-        }
+        const ids=[]; rel.items.forEach(item=>{const folder=touchFolder(item,rel.title);if(folder&&!ids.includes(folder.id))ids.push(folder.id);});
+        if(ids.length<2)return; const hub=ids[0]; for(let i=1;i<ids.length;i++){graph.get(hub).add(ids[i]);graph.get(ids[i]).add(hub);}
     });
-
-    const components = [];
-    const seen = new Set();
-    for (const id of folderMap.keys()) {
-        if (seen.has(id) || !(graph.get(id) && graph.get(id).size)) continue;
-        const queue = [id];
-        seen.add(id);
-        const ids = [];
-        while (queue.length) {
-            const cur = queue.shift();
-            ids.push(cur);
-            for (const next of graph.get(cur) || []) {
-                if (seen.has(next)) continue;
-                seen.add(next);
-                queue.push(next);
-            }
-        }
-        const folders = ids.map(fid => folderMap.get(fid)).filter(Boolean);
-        if (folders.length >= 2) components.push({ folders });
+    const components=[],seen=new Set();
+    for(const id of folderMap.keys()){
+        if(seen.has(id)||!(graph.get(id)&&graph.get(id).size))continue; const queue=[id];seen.add(id);const ids=[];
+        while(queue.length){const cur=queue.shift();ids.push(cur);for(const next of graph.get(cur)||[]){if(!seen.has(next)){seen.add(next);queue.push(next);}}}
+        const folders=ids.map(fid=>folderMap.get(fid)).filter(Boolean);if(folders.length>=2)components.push({folders});
     }
     return components;
 };
@@ -52172,6 +53667,8 @@ const executeDupFolderMergePlan = async plan => {
                 err.code = 'DUP_FOLDER_MERGE_VERIFY_FAILED';
                 throw err;
             }
+            op.sourceMeta.parent_id = op.targetId;
+            patchLiveResultStateAfterMove([op.sourceMeta], op.targetId, String(op.targetMeta && op.targetMeta.name || op.target.name || ''));
         }
 
         // The source subtree itself is intact; only its ancestry changed.  Mark the
@@ -52186,11 +53683,10 @@ const executeDupFolderMergePlan = async plan => {
         scheduleBackgroundResume(0);
         S.clearSelection();
         if (S.dupMode) {
-            // Keep the current match result available; paths will be corrected by
-            // the incremental index revalidation rather than rerunning dedupe.
             renderDupView();
             updateStat();
         }
+        persistCurrentResultAfterMutation();
         showToast(`文件夹合并完成：完整移动 ${prepared.length} 个来源文件夹，内部结构保持不变`, 'success', 5200);
     } catch (e) {
         const message = e && e.code === 'DUP_FOLDER_MERGE_VERIFY_FAILED'
@@ -52207,7 +53703,7 @@ const executeDupFolderMergePlan = async plan => {
 if (UI.btnDupFolderMerge) {
 UI.btnDupFolderMerge.onclick = async e => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    if (!S.dupMode || S.dupGroupView === 'folders') return;
+    if (!S.dupMode) return;
     const components = collectSelectedDupFolderMergeComponents();
     if (!components.length) {
         showToast('请在至少一个重复文件组内，勾选来自 2 个不同文件夹的匹配文件', 'warning', 4800);
@@ -52726,6 +54222,7 @@ const isClickInsideBtn = (UI.btnAnaSelect && UI.btnAnaSelect.contains(e.target))
 (UI.btnDupSameFolder && UI.btnDupSameFolder.contains(e.target)) ||
 (UI.btnDupVisual && UI.btnDupVisual.contains(e.target)) ||
 (UI.btnDupMerge && UI.btnDupMerge.contains(e.target)) ||
+(UI.btnDupExclude && UI.btnDupExclude.contains(e.target)) ||
 (UI.btnDupFolderMerge && UI.btnDupFolderMerge.contains(e.target)) ||
 (UI.btnDupSort && UI.btnDupSort.contains(e.target));
 
@@ -54225,6 +55722,7 @@ const folderMergeExecute = async (plan, deleteSources) => {
         if (targetItem) targetItem.size = String(freshTarget.total.bytes);
         S.clearSelection();
         await refresh();
+        persistCurrentResultAfterMutation();
         if (skippedSources > 0) showToast(L.msg_folder_merge_partial_sources.replace('{n}', String(skippedSources)), 'warning', 6000);
         showToast((deleteSources ? L.msg_folder_merge_done : L.msg_folder_merge_done_keep).replace('{moved}', String(movedCount)).replace('{saved}', fmtSize(plan.reclaimBytes)), 'success', 6000);
         return { movedCount, deleted, skippedSources, verified: true };
@@ -54434,6 +55932,7 @@ const folderExcludeExecute = async initialPlan => {
         clearGroupedGridMetaCache();
         clearGridStableRows(UI.in);
         await refresh();
+        persistCurrentResultAfterMutation();
         setTimeout(() => updateQuotaUI(), 1500);
         showToast(L.msg_folder_exclude_done.replace('{n}', String(deleted)).replace('{saved}', fmtSize(plan.deleteBytes)), 'success', 6000);
         setTimeout(() => showToast(L.msg_folder_exclude_changed, 'warning', 6500), 300);
@@ -55243,7 +56742,7 @@ files:[]
 });
 });
 
-const cacheKey = '__analyze_nodeMap_v469_' + startNodes.map(n => n.id).join('_');
+const cacheKey = '__analyze_nodeMap_v4644_catalog_' + startNodes.map(n => n.id).join('_');
 let useCache = false;
 
 if (window.pkGlobalIndex) {
@@ -55296,80 +56795,35 @@ let totalDirsScanned = 0;
 
 try {
 if (!useCache) {
-if (window.pkGlobalIndex) {
-const indexResult = await window.pkGlobalIndex.ensureScope(startNodes, {
-signal,
-background: false,
-requireComplete: true,
-onProgress: progress => updateLoadTxt(formatIndexProgress(progress))
-});
-if (!indexResult || indexResult.status !== 'ready') {
-const error = new Error('GLOBAL_INDEX_INCOMPLETE');
-error.code = 'GLOBAL_INDEX_INCOMPLETE';
-throw error;
+if (window.pkAnalysisCatalog) {
+    const aggregate = await window.pkAnalysisCatalog.buildFolderAggregate(startNodes, {
+        minBytes, signal, background: false, requireComplete: true,
+        onProgress: progress => updateLoadTxt(formatIndexProgress(progress))
+    });
+    nodeMap = aggregate.nodeMap;
+    totalFilesScanned = aggregate.totalFiles;
+    totalDirsScanned = aggregate.totalDirs;
+    Array.from(nodeMap.values()).forEach(node => { if (!node.isRoot && node.size >= minBytes && !largeFolders.includes(node)) largeFolders.push(node); });
+} else {
+    await coreRecursiveEngine(startNodes, {
+        signal: signal,
+        onFolder: (folder, filesInFolder, nextSubFolders) => {
+            totalDirsScanned++;
+            nextSubFolders.forEach(sub => { if (!nodeMap.has(sub.id)) nodeMap.set(sub.id, { id: sub.id, name: sub.name, icon_link: sub.icon_link, starred: sub.starred, tags: sub.tags, modified_time: sub.modified_time || sub.created_time || '', size: 0, parentId: folder.id, marked: false, _pathStr: sub.lineage.map(x => x.name).join('/'), lineage: sub.lineage, isRoot: false, files:[] }); });
+        },
+        onFile: (file, parent) => {
+            totalFilesScanned++; const sz = Number(file.size || 0); if (sz > 0) propagateSize(parent.id, sz);
+            if (nodeMap.has(parent.id)) { const contentHash = String(file.hash || file.gcid || file.md5_checksum || '').trim().toLocaleLowerCase(); const fingerprint = contentHash ? `H|${contentHash}|${sz}` : `U|${String(file.name || '').trim()}|${sz}`; let curId = parent.id; while (curId !== null && nodeMap.has(curId)) { nodeMap.get(curId).files.push(fingerprint); curId = nodeMap.get(curId).parentId; } }
+        },
+        onProgress: st => updateLoadTxt(formatIndexProgress(st))
+    });
 }
-}
-await coreRecursiveEngine(startNodes, {
-signal: signal,
 
-onFolder: (folder, filesInFolder, nextSubFolders) => {
-totalDirsScanned++;
-
-nextSubFolders.forEach(sub => {
-    if (!nodeMap.has(sub.id)) {
-        const fullPathStr = sub.lineage.map(x => x.name).join('/');
-
-        nodeMap.set(sub.id, {
-            id: sub.id,
-            name: sub.name,
-            icon_link: sub.icon_link,
-            starred: sub.starred,
-            tags: sub.tags,
-            modified_time: sub.modified_time || sub.created_time || '',
-            size: 0,
-            parentId: folder.id,
-            marked: false,
-            _pathStr: fullPathStr,
-            lineage: sub.lineage,
-            isRoot: false,
-            files:[]
-        });
-    }
-});
-},
-
-onFile: (file, parent) => {
-totalFilesScanned++;
-const sz = Number(file.size || 0);
-if (sz > 0) {
-    propagateSize(parent.id, sz);
-}
-if (nodeMap.has(parent.id)) {
-    const contentHash = String(file.hash || file.gcid || file.md5_checksum || '').trim().toLocaleLowerCase();
-    const fingerprint = contentHash
-        ? `H|${contentHash}|${sz}`
-        : `U|${String(file.name || '').trim()}|${sz}`;
-    let curId = parent.id;
-    while (curId !== null && nodeMap.has(curId)) {
-        nodeMap.get(curId).files.push(fingerprint);
-        curId = nodeMap.get(curId).parentId;
-    }
-}
-},
-
-onProgress: (st) => {
-updateLoadTxt(formatIndexProgress(st));
-}
-});
-
-if (!isRunning || signal.aborted || myScanId !== S.scanId) {
-throw new Error('StoppedByUser');
-}
+if (!isRunning || signal.aborted || myScanId !== S.scanId) throw new Error('StoppedByUser');
 
 if (typeof globalCache !== 'undefined') {
-const entries = Array.from(nodeMap.entries());
-if (window.pkGlobalIndex) window.pkGlobalIndex.setDerived(cacheKey, entries);
-else globalCache.set(cacheKey, entries);
+    const entries = Array.from(nodeMap.entries());
+    if (window.pkGlobalIndex) window.pkGlobalIndex.setDerived(cacheKey, entries); else globalCache.set(cacheKey, entries);
 }
 } else {
 Array.from(nodeMap.values()).forEach(node => {
@@ -57278,6 +58732,7 @@ function openVerifiedCsvTrashModal(){
 }
 
 
+
 if (UI.btnExport) {
 UI.btnExport.onclick = async () => {
 if (S.trashMode) return;
@@ -57949,6 +59404,7 @@ const row = UI.in.querySelector(`.pk-row[data-id="${id}"]`);
 patchStage01RenameVisibleRow(row, newName, nowIso);
 
 if (S.dupMode) renderDupView(); else refresh();
+persistCurrentResultAfterMutation();
 renameSucceeded = true;
 
 } catch (e) {
@@ -62213,6 +63669,7 @@ if (!silent && !S.dupMode) {
 showToast(isTask ? L.msg_task_deleted : L.msg_del_items_done.replace('{n}', deletedCount));
 }
 deleteCompleted = true;
+persistCurrentResultAfterMutation();
 
 } catch (e) {
 console.error(e);
@@ -64108,11 +65565,99 @@ const map = {
 };
 return map[type] || { label: '结果', icon: '📋' };
 };
-// 4.6.35 global quick-return entries. Keep at most two sidebar shortcuts:
-// the newest dedupe/match result and the newest search result. The actual data
-// continues to live in ResultHistoryStore, so the shortcuts survive refresh/restart.
+// 4.6.45 robust latest-result quick returns ---------------------------------
+// The old history store refused to write whenever an account id could not be
+// resolved.  That made both the history list and the quick-return buttons stay
+// empty on affected PikPak sessions.  The two quick-return slots are now kept in
+// a tiny native IndexedDB store that never depends on account identity in order
+// to write.  Account id is only an optional hint used to avoid restoring a known
+// snapshot from a different account.  Memory is updated first so buttons appear
+// immediately even if IndexedDB is unavailable.
 const resultHistoryMatchTypes = new Set(['file_dup', 'visual_dup', 'folder_dup']);
 const resultHistoryIsMatchType = type => resultHistoryMatchTypes.has(String(type || ''));
+const LatestResultStore = (() => {
+    const DB_NAME = 'pk_latest_results_v1';
+    const STORE_NAME = 'latest';
+    const DB_VERSION = 1;
+    const SCHEMA = 1;
+    const memory = window.__pkLatestResultMemory instanceof Map ? window.__pkLatestResultMemory : new Map();
+    window.__pkLatestResultMemory = memory;
+    let openPromise = null;
+    const currentAccountHint = () => {
+        try { return String(typeof getCurrentDriveAccountId === 'function' ? (getCurrentDriveAccountId() || '') : '').trim(); }
+        catch (e) { return ''; }
+    };
+    const openDb = () => {
+        if (openPromise) return openPromise;
+        openPromise = new Promise((resolve, reject) => {
+            if (typeof indexedDB === 'undefined') { resolve(null); return; }
+            let req;
+            try { req = indexedDB.open(DB_NAME, DB_VERSION); } catch (e) { reject(e); return; }
+            req.onupgradeneeded = () => {
+                const db = req.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'slot' });
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error || new Error('LATEST_RESULT_DB_OPEN_FAILED'));
+            req.onblocked = () => console.warn('[LatestResult] IndexedDB open blocked');
+        }).catch(e => { console.warn('[LatestResult] IndexedDB unavailable:', e); return null; });
+        return openPromise;
+    };
+    const put = async (slot, row) => {
+        slot = slot === 'search' ? 'search' : 'match';
+        if (!row || !row.data) return null;
+        const saved = { ...row, schema: SCHEMA, slot, savedAt: Number(row.savedAt || Date.now()), accountHint: currentAccountHint() };
+        memory.set(slot, saved);
+        const db = await openDb();
+        if (!db) return saved;
+        try {
+            await new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).put(saved);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error || new Error('LATEST_RESULT_DB_WRITE_FAILED'));
+                tx.onabort = () => reject(tx.error || new Error('LATEST_RESULT_DB_WRITE_ABORTED'));
+            });
+        } catch (e) { console.warn('[LatestResult] write failed:', e); }
+        return saved;
+    };
+    const get = async slot => {
+        slot = slot === 'search' ? 'search' : 'match';
+        const cached = memory.get(slot);
+        if (cached) return cached;
+        const db = await openDb();
+        if (!db) return null;
+        let row = null;
+        try {
+            row = await new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const req = tx.objectStore(STORE_NAME).get(slot);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => reject(req.error || new Error('LATEST_RESULT_DB_READ_FAILED'));
+            });
+        } catch (e) { console.warn('[LatestResult] read failed:', e); return null; }
+        if (!row || row.schema !== SCHEMA || !row.data) return null;
+        const nowAccount = currentAccountHint();
+        const rowAccount = String(row.accountHint || '').trim();
+        if (nowAccount && rowAccount && nowAccount !== rowAccount) return null;
+        memory.set(slot, row);
+        return row;
+    };
+    const remove = async slot => {
+        slot = slot === 'search' ? 'search' : 'match';
+        memory.delete(slot);
+        const db = await openDb(); if (!db) return;
+        try { await new Promise((resolve,reject)=>{ const tx=db.transaction(STORE_NAME,'readwrite'); tx.objectStore(STORE_NAME).delete(slot); tx.oncomplete=()=>resolve(); tx.onerror=()=>reject(tx.error); }); } catch(e){}
+    };
+    const clearAll = async () => {
+        memory.clear();
+        const db = await openDb(); if (!db) return;
+        try { await new Promise((resolve,reject)=>{ const tx=db.transaction(STORE_NAME,'readwrite'); tx.objectStore(STORE_NAME).clear(); tx.oncomplete=()=>resolve(); tx.onerror=()=>reject(tx.error); }); } catch(e){}
+    };
+    return { dbName: DB_NAME, storeName: STORE_NAME, put, get, remove, clearAll };
+})();
+window.pkLatestResultStore = LatestResultStore;
+
 const resultHistorySetQuickButton = (button, row, kind) => {
     if (!button) return;
     if (!row || !row.id) {
@@ -64131,42 +65676,31 @@ const resultHistorySetQuickButton = (button, row, kind) => {
     const span = button.querySelector('span');
     if (span) span.textContent = label;
 };
-async function refreshResultQuickReturnButtons(prefetchedRows = null) {
-    const store = window.pkResultHistoryStore;
+async function refreshResultQuickReturnButtons() {
+    const store = window.pkLatestResultStore;
     if (!store) {
         resultHistorySetQuickButton(UI.btnNavReturnMatch, null, 'match');
         resultHistorySetQuickButton(UI.btnNavReturnSearch, null, 'search');
         return;
     }
-    let rows = Array.isArray(prefetchedRows) ? prefetchedRows : null;
-    if (!rows) { try { rows = await store.list(); } catch (e) { rows = []; } }
-    const newestMatch = rows.find(row => row && resultHistoryIsMatchType(row.type)) || null;
-    const newestSearch = rows.find(row => row && row.type === 'search') || null;
-    resultHistorySetQuickButton(UI.btnNavReturnMatch, newestMatch, 'match');
-    resultHistorySetQuickButton(UI.btnNavReturnSearch, newestSearch, 'search');
+    const [match, search] = await Promise.all([store.get('match').catch(()=>null), store.get('search').catch(()=>null)]);
+    resultHistorySetQuickButton(UI.btnNavReturnMatch, match, 'match');
+    resultHistorySetQuickButton(UI.btnNavReturnSearch, search, 'search');
 }
 async function openLatestResultQuick(kind, button) {
-    const store = window.pkResultHistoryStore;
-    if (!store) { showToast('历史结果存储尚未就绪', 'warning'); return false; }
-    let record = null;
-    const id = String(button && button.dataset && button.dataset.historyId || '');
-    if (id && typeof store.get === 'function') { try { record = await store.get(id); } catch (e) {} }
+    const store = window.pkLatestResultStore;
+    if (!store) { showToast('最近结果存储尚未就绪', 'warning'); return false; }
+    const slot = kind === 'search' ? 'search' : 'match';
+    const record = await store.get(slot).catch(()=>null);
     if (!record) {
-        let rows = []; try { rows = await store.list(); } catch (e) {}
-        record = kind === 'search'
-            ? (rows.find(row => row && row.type === 'search') || null)
-            : (rows.find(row => row && resultHistoryIsMatchType(row.type)) || null);
-        await refreshResultQuickReturnButtons(rows);
-    }
-    if (!record) {
+        resultHistorySetQuickButton(button, null, kind);
         showToast(kind === 'search' ? '暂无可返回的搜索结果' : '暂无可返回的匹配结果', 'warning', 3500);
         return false;
     }
     return restoreResultHistorySnapshot(record);
 }
 async function saveResultHistorySnapshot(type, options = {}) {
-const store = window.pkResultHistoryStore;
-if (!store || !type) return null;
+if (!type) return null;
 try {
     let data = null;
     let itemCount = 0;
@@ -64199,8 +65733,8 @@ try {
         data = {
             kind: type, path: resultHistoryClone(S.path) || [], items, groups,
             dupConfig: resultHistoryClone(S.dupConfig) || null,
-            visualDupMode: type === 'visual_dup', visualDupConfig: resultHistoryClone(S.visualDupConfig) || null, visualWatermarkOnly: !!S.visualWatermarkOnly,
-            dupGroupView: S.dupGroupView === 'folders' ? 'folders' : 'files',
+            visualDupMode: type === 'visual_dup', visualDupConfig: resultHistoryClone(S.visualDupConfig) || null, visualWatermarkOnly: !!S.visualWatermarkOnly, visualFolderHighCoverageOnly: S.visualFolderHighCoverageOnly !== false, dupReviewOnly: !!S.dupReviewOnly, dupSelectedGroupsOnly: !!S.dupSelectedGroupsOnly,
+            dupGroupView: S.dupGroupView === 'folders' ? 'folders' : 'files', dupResultSortKey: S.dupResultSortKey || '', dupResultSortDir: S.dupResultSortDir || 1,
             chkHash: UI.chkHash ? !!UI.chkHash.checked : true, chkSim: UI.chkSim ? !!UI.chkSim.checked : false, chkName: UI.chkName ? !!UI.chkName.checked : false,
             folderSelValue: UI.selDupFolder ? String(UI.selDupFolder.value || '') : '', invertChecked: invertChk ? !!invertChk.checked : false,
             pinnedDupPath: S.pinnedDupPath || null, groupSortOp: S.groupSortOp || 'path', groupSortDir: S.groupSortDir || 1,
@@ -64231,10 +65765,17 @@ try {
     const firstId = ids[0] && ids[0].id || '';
     const lastId = ids[ids.length - 1] && ids[ids.length - 1].id || '';
     const signature = [type, options.signature || '', data.query || '', groupCount, itemCount, firstId, lastId, S.scanId || 0].join('|');
-    const savedRow = await store.put({ type, title, subtitle, itemCount, groupCount, signature, data });
-    if (savedRow && (savedRow.type === 'search' || resultHistoryIsMatchType(savedRow.type))) {
-        if (savedRow.type === 'search') resultHistorySetQuickButton(UI.btnNavReturnSearch, savedRow, 'search');
+    const savedRow = {
+        id: `lr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`,
+        savedAt: Date.now(), type, title, subtitle, itemCount, groupCount, signature, data
+    };
+    if (savedRow.type === 'search' || resultHistoryIsMatchType(savedRow.type)) {
+        const slot = savedRow.type === 'search' ? 'search' : 'match';
+        // Update UI first; IndexedDB persistence happens immediately after but is
+        // no longer allowed to suppress the button when identity/storage is slow.
+        if (slot === 'search') resultHistorySetQuickButton(UI.btnNavReturnSearch, savedRow, 'search');
         else resultHistorySetQuickButton(UI.btnNavReturnMatch, savedRow, 'match');
+        if (window.pkLatestResultStore) await window.pkLatestResultStore.put(slot, savedRow);
     }
     return savedRow;
 } catch (e) {
@@ -64328,7 +65869,7 @@ try {
         await refresh();
     } else if (data.kind === 'file_dup' || data.kind === 'visual_dup') {
         applyResultHistoryNormalShell();
-        S.dupMode = true; S.visualDupMode = data.kind === 'visual_dup'; S.visualDupConfig = resultHistoryClone(data.visualDupConfig) || null; S.visualWatermarkOnly = !!data.visualWatermarkOnly;
+        S.dupMode = true; S.visualDupMode = data.kind === 'visual_dup'; S.visualDupConfig = resultHistoryClone(data.visualDupConfig) || null; S.visualWatermarkOnly = !!data.visualWatermarkOnly; S.visualFolderHighCoverageOnly = data.visualFolderHighCoverageOnly !== false; S.dupReviewOnly = !!data.dupReviewOnly; S.dupSelectedGroupsOnly = !!data.dupSelectedGroupsOnly; S.dupResultSortKey = data.dupResultSortKey || ''; S.dupResultSortDir = Number(data.dupResultSortDir) === -1 ? -1 : 1;
         S.isFlattened = false; S.analyzeMode = false;
         S.path = Array.isArray(data.path) && data.path.length ? resultHistoryClone(data.path) : [{ id: '', name: L.btn_nav_home }];
         const items = resultHistoryPackItems(data.items);
@@ -64351,6 +65892,9 @@ try {
         if (UI.dupFilters) UI.dupFilters.style.display = S.visualDupMode ? 'none' : 'flex';
         if (UI.visualDupInfo) UI.visualDupInfo.style.display = S.visualDupMode ? 'flex' : 'none';
         if (UI.chkVisualWatermarkOnly) UI.chkVisualWatermarkOnly.checked = !!S.visualWatermarkOnly;
+        if (UI.chkVisualFolderHighCov) UI.chkVisualFolderHighCov.checked = S.visualFolderHighCoverageOnly !== false;
+        if (UI.chkDupReviewOnly) UI.chkDupReviewOnly.checked = !!S.dupReviewOnly;
+        if (UI.chkDupSelectedOnly) UI.chkDupSelectedOnly.checked = !!S.dupSelectedGroupsOnly;
         if (UI.visualDupInfoTxt && S.visualDupMode) UI.visualDupInfoTxt.textContent = `${S.visualDupConfig && S.visualDupConfig.mode === 'precise' ? `精确 ${(S.visualDupConfig.frameCount || (S.visualDupConfig.frameFractions || []).length || 3)}帧@${(S.visualDupConfig.framePositionsPct || []).join('/') || '20/50/80'}%` : '缩略图'} ≥${Number((S.visualDupConfig && S.visualDupConfig.thresholdPct) || 95).toFixed(1).replace(/\.0$/, '')}%`;
         if (UI.btnExit) UI.btnExit.style.display = 'flex';
         if (UI.scan) UI.scan.style.display = 'none';
@@ -64361,9 +65905,9 @@ try {
         if (UI.btnFolderFirst) UI.btnFolderFirst.style.display = 'none';
         if (UI.vp) UI.vp.style.overflowX = 'hidden';
         if (typeof applyResolvedViewMode === 'function') applyResolvedViewMode('file_dup');
-        renderDupView();
         const selected = new Set(Array.isArray(data.selectedIds) ? data.selectedIds.map(String) : []);
         S.setExplicitSelection(Array.from(selected));
+        renderDupView();
         renderVisible(); updateStat();
     } else if (data.kind === 'folder_dup' || data.kind === 'folder_scan') {
         applyResultHistoryNormalShell();
@@ -68185,15 +69729,12 @@ UI.btnNavHome.onclick = () => switchTab('home');
 if(UI.btnNavStarred) UI.btnNavStarred.onclick = () => switchTab('starred');
 if(UI.btnNavRecent) UI.btnNavRecent.onclick = () => switchTab('recent');
 if(UI.btnNavHistory) UI.btnNavHistory.onclick = () => switchTab('history');
-if(UI.btnNavResultHistory) UI.btnNavResultHistory.onclick = () => { void showResultHistoryPanel(); };
 if(UI.btnNavReturnMatch) UI.btnNavReturnMatch.onclick = () => { void openLatestResultQuick('match', UI.btnNavReturnMatch); };
 if(UI.btnNavReturnSearch) UI.btnNavReturnSearch.onclick = () => { void openLatestResultQuick('search', UI.btnNavReturnSearch); };
-// ResultHistoryStore is defined later in this userscript. Timers run after the
-// synchronous bootstrap has finished, then refresh again in case account identity
-// becomes available slightly later.
+// Restore the two latest-result slots after synchronous bootstrap. Native IndexedDB
+// does not depend on PikPak account identity, so one early refresh is normally enough.
 setTimeout(() => { void refreshResultQuickReturnButtons(); }, 0);
-setTimeout(() => { void refreshResultQuickReturnButtons(); }, 1600);
-setTimeout(() => { void refreshResultQuickReturnButtons(); }, 5000);
+setTimeout(() => { void refreshResultQuickReturnButtons(); }, 800);
 document.addEventListener('pk-official-auth-ready', () => { setTimeout(() => { void refreshResultQuickReturnButtons(); }, 0); });
 if(UI.btnNavUpload) UI.btnNavUpload.onclick = () => switchTab('upload');
 if(UI.btnNavShare) UI.btnNavShare.onclick = () => switchTab('share');
@@ -76623,7 +78164,10 @@ const META_STORE = 'meta';
 const FOLDER_SCHEMA = 1;
 const DETAIL_SCHEMA = 1;
 const META_SCHEMA = 1;
-const FOLDER_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+// 4.6.46: folder rows are durable catalog data. Freshness is governed by
+// `verifiedAt` + incremental verification, not by throwing the whole catalog
+// away after a short TTL.
+const FOLDER_MAX_AGE = 365 * 24 * 60 * 60 * 1000;
 const DETAIL_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
 const DETAIL_MAX_PER_ACCOUNT = 128;
 let folderStore = null;
@@ -76635,6 +78179,24 @@ const accountId = () => {
     try {
         return typeof getCurrentDriveAccountId === 'function' ? String(getCurrentDriveAccountId() || '').trim() : '';
     } catch (e) { return ''; }
+};
+// 4.6.46: persistence must wait for account identity instead of silently
+// skipping reads/writes during early page bootstrap.
+const resolveAccountId = async () => {
+    const immediate = accountId();
+    if (immediate) return immediate;
+    try {
+        if (typeof ensureCurrentDriveAccountId === 'function') {
+            const ensured = String(await ensureCurrentDriveAccountId() || '').trim();
+            if (ensured) return ensured;
+        }
+    } catch (e) {}
+    for (let i = 0; i < 24; i++) {
+        await new Promise(resolve => setTimeout(resolve, 250));
+        const retry = accountId();
+        if (retry) return retry;
+    }
+    return '';
 };
 const canonicalFolderId = id => {
     const value = String(id === undefined || id === null ? '' : id).trim();
@@ -76656,8 +78218,65 @@ const safeRemove = async (store, key) => {
     try { await store.removeItem(key); } catch (e) {}
 };
 const fullMetaKey = account => `${account}\u0001full-index`;
+const dirtyMetaKey = account => `${account}\u0001dirty-folders`;
+let dirtyMetaMutationChain = Promise.resolve();
+const readDirtyFolderIdsRaw = async account => {
+    const stores = getStores();
+    if (!account || !stores) return [];
+    try {
+        const row = await stores.metaStore.getItem(dirtyMetaKey(account));
+        if (!row || row.schema !== META_SCHEMA || row.accountId !== account || !Array.isArray(row.ids)) return [];
+        return Array.from(new Set(row.ids.map(canonicalFolderId)));
+    } catch (e) {
+        console.warn('[PersistentScan] read dirty-folder metadata failed:', e);
+        return [];
+    }
+};
+const readDirtyFolderIds = async explicitAccount => {
+    const account = String(explicitAccount || await resolveAccountId() || '').trim();
+    if (!account) return [];
+    try { await dirtyMetaMutationChain; } catch (e) {}
+    return readDirtyFolderIdsRaw(account);
+};
+const writeDirtyFolderIds = async (account, ids) => {
+    const stores = getStores();
+    if (!account || !stores) return false;
+    const normalized = Array.from(new Set((Array.isArray(ids) ? ids : Array.from(ids || [])).map(canonicalFolderId)));
+    try {
+        if (!normalized.length) {
+            await safeRemove(stores.metaStore, dirtyMetaKey(account));
+            return true;
+        }
+        await stores.metaStore.setItem(dirtyMetaKey(account), {
+            schema: META_SCHEMA, accountId: account, savedAt: Date.now(), ids: normalized
+        });
+        return true;
+    } catch (e) {
+        console.warn('[PersistentScan] write dirty-folder metadata failed:', e);
+        return false;
+    }
+};
+const mutateDirtyFolderIds = async mutator => {
+    const account = await resolveAccountId();
+    if (!account) return false;
+    const run = dirtyMetaMutationChain.then(async () => {
+        const current = new Set(await readDirtyFolderIdsRaw(account));
+        mutator(current);
+        return writeDirtyFolderIds(account, current);
+    });
+    dirtyMetaMutationChain = run.catch(() => false);
+    return run;
+};
+const markDirtyFolders = async folderIds => {
+    const ids = Array.isArray(folderIds) || folderIds instanceof Set ? Array.from(folderIds) : [folderIds];
+    return mutateDirtyFolderIds(current => ids.forEach(id => current.add(canonicalFolderId(id))));
+};
+const clearDirtyFolders = async folderIds => {
+    const ids = Array.isArray(folderIds) || folderIds instanceof Set ? Array.from(folderIds) : [folderIds];
+    return mutateDirtyFolderIds(current => ids.forEach(id => current.delete(canonicalFolderId(id))));
+};
 const getFullMeta = async () => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return null;
     const key = fullMetaKey(account);
@@ -76674,7 +78293,7 @@ const getFullMeta = async () => {
     }
 };
 const markFullReady = async folderCount => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return false;
     try {
@@ -76691,7 +78310,7 @@ const markFullReady = async folderCount => {
     }
 };
 const invalidateFullReady = async () => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return;
     await safeRemove(stores.metaStore, fullMetaKey(account));
@@ -76703,7 +78322,7 @@ const invalidateFullReady = async () => {
 // starting the crawler. Existing 4.6.24-4.6.26 rows are accepted once as a legacy
 // snapshot and receive a completeness marker after successful certification.
 const loadFullIndex = async () => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return null;
     const meta = await getFullMeta();
@@ -76733,10 +78352,11 @@ const loadFullIndex = async () => {
         const db = Array.isArray(b.lineage) ? b.lineage.length : 0;
         return da - db;
     });
-    return { rows, meta, legacy: !meta };
+    const dirtyIds = await readDirtyFolderIds(account);
+    return { rows, meta, dirtyIds, legacy: !meta };
 };
 const getFolder = async folderId => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return null;
     const key = makeKey(account, folderId);
@@ -76757,7 +78377,7 @@ const getFolder = async folderId => {
     }
 };
 const putFolder = async (folderId, items, meta = {}) => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores || !Array.isArray(items)) return false;
     const id = canonicalFolderId(folderId);
@@ -76782,12 +78402,32 @@ const putFolder = async (folderId, items, meta = {}) => {
     }
 };
 const removeFolders = async folderIds => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return;
-    const ids = Array.isArray(folderIds) || folderIds instanceof Set ? Array.from(folderIds) : [folderIds];
-    await Promise.all(ids.map(id => safeRemove(stores.folderStore, makeKey(account, id))));
-    await invalidateFullReady();
+    const ids = Array.from(new Set((Array.isArray(folderIds) || folderIds instanceof Set ? Array.from(folderIds) : [folderIds]).map(canonicalFolderId)));
+    let removed = 0;
+    for (const id of ids) {
+        const key = makeKey(account, id);
+        try {
+            const existed = await stores.folderStore.getItem(key);
+            if (existed) removed++;
+        } catch (e) {}
+        await safeRemove(stores.folderStore, key);
+    }
+    await clearDirtyFolders(ids);
+    if (removed > 0) {
+        try {
+            const meta = await getFullMeta();
+            if (meta) {
+                await stores.metaStore.setItem(fullMetaKey(account), {
+                    ...meta,
+                    savedAt: Date.now(),
+                    folderCount: Math.max(1, Math.max(1, Number(meta.folderCount) || 1) - removed)
+                });
+            }
+        } catch (e) {}
+    }
 };
 const serializeDetailed = (scan, signature) => {
     if (!scan) return null;
@@ -76820,7 +78460,7 @@ const deserializeDetailed = data => {
     };
 };
 const getDetailed = async (folderId, signature) => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return null;
     const key = makeKey(account, folderId);
@@ -76854,7 +78494,7 @@ const trimDetailed = async account => {
     } catch (e) {}
 };
 const putDetailed = async (folderId, signature, scan) => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores || !scan) return false;
     const id = canonicalFolderId(folderId);
@@ -76878,14 +78518,14 @@ const putDetailed = async (folderId, signature, scan) => {
     }
 };
 const removeDetailed = async folderIds => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return;
     const ids = Array.isArray(folderIds) || folderIds instanceof Set ? Array.from(folderIds) : [folderIds];
     await Promise.all(ids.map(id => safeRemove(stores.detailStore, makeKey(account, id))));
 };
 const clearDetailedForAccount = async () => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) return;
     const keys = [];
@@ -76897,7 +78537,7 @@ const clearDetailedForAccount = async () => {
     } catch (e) {}
 };
 const exportCurrentAccount = async () => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) throw new Error('ACCOUNT_NOT_READY');
     const collect = async store => {
@@ -76913,7 +78553,7 @@ const exportCurrentAccount = async () => {
     };
 };
 const importBackup = async data => {
-    const account = accountId();
+    const account = await resolveAccountId();
     const stores = getStores();
     if (!account || !stores) throw new Error('ACCOUNT_NOT_READY');
     if (!data || data.kind !== 'PEM Persistent Scan Backup') throw new Error('BACKUP_INVALID');
@@ -76958,6 +78598,10 @@ return {
     getFullMeta,
     markFullReady,
     invalidateFullReady,
+    markDirtyFolders,
+    clearDirtyFolders,
+    readDirtyFolderIds,
+    resolveAccountId,
     loadFullIndex,
     exportCurrentAccount,
     importBackup,
@@ -77055,6 +78699,9 @@ const derivedCache = new Map();
 let indexRevision = 0;
 let indexGeneration = 0;
 let fullStatus = 'idle';
+// 4.6.46: completeness and freshness are separate. Dirty rows remain usable as
+// the last known catalog while only those folders are revalidated.
+let fullCatalogComplete = false;
 let activeFullRun = null;
 let persistentFullRestorePromise = null;
 let persistentFullRestoreAttempted = false;
@@ -77147,8 +78794,8 @@ reject(error);
 });
 };
 const syncLegacyReadyFlags = () => {
-isGlobalIndexReady = fullStatus === 'ready';
-globalNeedsSync = fullStatus !== 'ready';
+isGlobalIndexReady = fullCatalogComplete && fullStatus === 'ready';
+globalNeedsSync = !fullCatalogComplete || fullStatus !== 'ready' || hasDirtyHomeFolders() || hasUnstableMutations();
 };
 const hasUnstableMutations = () => {
 if (typeof globalFolderMutationStates === 'undefined') return false;
@@ -77281,11 +78928,14 @@ const previous = previousFolderById.get(String(item.id));
 if (!previous) return false;
 return ['modified_time', 'file_count', 'size'].some(key => String(previous[key] ?? '') !== String(item[key] ?? ''));
 });
+missingAddedFolders.forEach(item => {
+if (!isDirtyId(item.id)) markDirty(item.id);
+});
 changedChildFolders.forEach(item => {
 if (!isDirtyId(item.id)) markDirty(item.id);
 });
 if (missingAddedFolders.length > 0 || changedChildFolders.length > 0) {
-if (fullStatus === 'ready') {
+if (!fullCatalogComplete && fullStatus === 'ready') {
 fullStatus = 'dirty';
 syncLegacyReadyFlags();
 }
@@ -77305,6 +78955,10 @@ if (serverListingChanged) {
 
 globalDirtyFolders.delete(id);
 if (!id) globalDirtyFolders.delete('root');
+if (!options.fromPersistent && window.pkPersistentScanStore && typeof window.pkPersistentScanStore.clearDirtyFolders === 'function') {
+    void window.pkPersistentScanStore.clearDirtyFolders([id]);
+}
+if (fullCatalogComplete && fullStatus !== 'building' && fullStatus !== 'degraded') fullStatus = 'ready';
 indexRevision++;
 if (options.persist !== false && window.pkPersistentScanStore) {
     void window.pkPersistentScanStore.putFolder(id, items, {
@@ -77416,14 +79070,14 @@ if (state.revision === requestStateRevision) {
 state.status = 'dirty';
 state.error = error;
 }
-if (fullStatus === 'ready') fullStatus = 'dirty';
+if (!fullCatalogComplete && fullStatus === 'ready') fullStatus = 'dirty';
 syncLegacyReadyFlags();
 }
 throw error;
 }
 state.status = 'failed';
 state.error = error;
-if (fullStatus === 'ready') fullStatus = 'degraded';
+if (!fullCatalogComplete && fullStatus === 'ready') fullStatus = 'degraded';
 syncLegacyReadyFlags();
 throw error;
 }).finally(() => {
@@ -77556,8 +79210,11 @@ const runVerificationQueue = async () => {
         if (verificationQueue.size && generation === verificationGeneration) runVerificationQueueSoon(1800);
     }
 };
-const scheduleRestoredVerification = rows => {
+const scheduleRestoredVerification = (rows, dirtyIds = []) => {
     const list = Array.isArray(rows) ? rows : [];
+    (Array.isArray(dirtyIds) ? dirtyIds : []).forEach(id => {
+        scheduleVerify(id, { priority: -20, maxAgeMs: 0, reason: 'persisted_dirty', delayMs: 120 });
+    });
     // Root is cheap and catches top-level changes quickly.
     scheduleVerify('', { priority: 0, maxAgeMs: VERIFY_CURRENT_MAX_AGE, reason: 'restore_root', delayMs: 350 });
     const stale = list
@@ -77579,12 +79236,17 @@ const cancelVerificationQueue = () => {
 };
 
 const restorePersistentFullIndex = async () => {
-if (fullStatus === 'ready' && !hasDirtyHomeFolders() && !hasUnstableMutations()) return true;
+if (fullCatalogComplete && fullStatus === 'ready') return true;
 if (persistentFullRestorePromise) return persistentFullRestorePromise;
 if (persistentFullRestoreAttempted || !window.pkPersistentScanStore || typeof window.pkPersistentScanStore.loadFullIndex !== 'function') return false;
+try {
+    const account = typeof window.pkPersistentScanStore.resolveAccountId === 'function'
+        ? await window.pkPersistentScanStore.resolveAccountId()
+        : (typeof ensureCurrentDriveAccountId === 'function' ? await ensureCurrentDriveAccountId() : getCurrentDriveAccountId());
+    if (!String(account || '').trim()) return false;
+} catch (e) { return false; }
 persistentFullRestoreAttempted = true;
 persistentFullRestorePromise = (async () => {
-    if (hasDirtyHomeFolders() || hasUnstableMutations()) return false;
     const snapshot = await window.pkPersistentScanStore.loadFullIndex();
     if (!snapshot || !Array.isArray(snapshot.rows) || !snapshot.rows.length) return false;
 
@@ -77608,17 +79270,27 @@ persistentFullRestorePromise = (async () => {
         if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.add(id);
     });
 
+    (Array.isArray(snapshot.dirtyIds) ? snapshot.dirtyIds : []).forEach(rawId => {
+        const id = canonicalId(rawId);
+        if (!isHomeFolderId(id)) return;
+        const state = getState(id, true);
+        state.status = 'dirty';
+        state.error = null;
+        globalDirtyFolders.add(id);
+    });
     indexRevision++;
     const ok = certifyFullFromCache();
     if (!ok) {
+        fullCatalogComplete = false;
         fullStatus = 'idle';
         syncLegacyReadyFlags();
         return false;
     }
-    scheduleRestoredVerification(snapshot.rows);
+    scheduleRestoredVerification(snapshot.rows, snapshot.dirtyIds || []);
     return true;
 })().catch(error => {
     console.warn('[PersistentScan] complete index restore failed:', error);
+    fullCatalogComplete = false;
     fullStatus = 'idle';
     syncLegacyReadyFlags();
     return false;
@@ -77666,7 +79338,7 @@ onFolderError: (folder, error) => run.failed.set(canonicalId(folder && folder.id
 onProgress: progress => emitFullProgress(run, progress)
 });
 } catch (error) {
-fullStatus = 'dirty';
+fullStatus = fullCatalogComplete ? 'ready' : 'dirty';
 syncLegacyReadyFlags();
 if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(error)) {
     scheduleBackgroundResume(30000);
@@ -77683,7 +79355,7 @@ if (!run.needsRescan && !hasDirtyHomeFolders() && !hasUnstableMutations() && cer
 }
 
 if (run.failed.size > 0) {
-fullStatus = 'degraded';
+fullStatus = fullCatalogComplete ? 'ready' : 'degraded';
 syncLegacyReadyFlags();
 }
 emitFullProgress(run, stats);
@@ -77700,13 +79372,18 @@ if (activeFullRun === run) activeFullRun = null;
 return run;
 };
 const ensureFull = (options = {}) => {
-if (fullStatus === 'ready' && !hasDirtyHomeFolders() && !hasUnstableMutations()) {
-return waitForConsumer(Promise.resolve({ status: 'ready', completed: folderStates.size, failed: 0, revision: indexRevision }), options.signal);
+if (fullCatalogComplete && fullStatus === 'ready' && options.force !== true && options.requireFresh !== true) {
+    const dirtyIds = Array.from(globalDirtyFolders).map(canonicalId).filter(isHomeFolderId);
+    if (dirtyIds.length) scheduleVerify(dirtyIds, { priority: 5, maxAgeMs: 0, reason: 'ensure_full_dirty', delayMs: 100 });
+    return waitForConsumer(Promise.resolve({
+        status: 'ready', completed: folderStates.size, failed: 0, revision: indexRevision,
+        dirty: dirtyIds.length, staleCatalog: dirtyIds.length > 0
+    }), options.signal);
 }
-if (options._skipPersistentRestore !== true && !activeFullRun && !persistentFullRestoreAttempted) {
+if (options._skipPersistentRestore !== true && options.force !== true && !activeFullRun && !persistentFullRestoreAttempted) {
     const restoreTask = Promise.resolve(restorePersistentFullIndex()).then(restored => {
-        if (restored && fullStatus === 'ready' && !hasDirtyHomeFolders() && !hasUnstableMutations()) {
-            return { status: 'ready', completed: folderStates.size, failed: 0, revision: indexRevision, restored: true };
+        if (restored && fullCatalogComplete && fullStatus === 'ready') {
+            return { status: 'ready', completed: folderStates.size, failed: 0, revision: indexRevision, restored: true, dirty: globalDirtyFolders.size };
         }
         return ensureFull({ ...options, signal: null, _skipPersistentRestore: true });
     });
@@ -77735,7 +79412,6 @@ if (ownsForegroundDemand) run.foregroundConsumers = Math.max(0, run.foregroundCo
 });
 };
 const certifyFullFromCache = () => {
-if (hasDirtyHomeFolders() || hasUnstableMutations()) return false;
 const queue = [''];
 const seen = new Set();
 while (queue.length > 0) {
@@ -77743,12 +79419,12 @@ const id = canonicalId(queue.pop());
 if (seen.has(id)) continue;
 seen.add(id);
 const files = getCachedArray(id);
-const state = getState(id, false);
-if (!files || (state && (state.status === 'dirty' || state.status === 'failed' || state.status === 'loading'))) return false;
+if (!files) return false;
 files.forEach(item => {
 if (item && item.kind === 'drive#folder' && item.id) queue.push(item.id);
 });
 }
+fullCatalogComplete = true;
 fullStatus = 'ready';
 syncLegacyReadyFlags();
 if (window.pkPersistentScanStore && typeof window.pkPersistentScanStore.markFullReady === 'function') {
@@ -77763,6 +79439,11 @@ name: id && typeof id === 'object' ? id.name : '',
 lineage: id && typeof id === 'object' && Array.isArray(id.lineage) ? id.lineage : []
 }));
 if (roots.some(node => !node.id)) return ensureFull(options);
+if (fullCatalogComplete && fullStatus === 'ready' && options.force !== true && options.requireFresh !== true) {
+    const staleRoots = roots.map(node => node.id).filter(id => !isFolderVerifiedFresh(id, VERIFY_ACTIVE_MAX_AGE));
+    if (staleRoots.length) scheduleVerify(staleRoots, { priority: 8, maxAgeMs: VERIFY_ACTIVE_MAX_AGE, reason: 'ensure_scope', delayMs: 100 });
+    return { status: 'ready', completed: roots.length, failed: 0, failedIds: [], revision: indexRevision, staleCatalog: hasDirtyHomeFolders() };
+}
 
 const failed = new Map();
 const stats = await coreRecursiveEngine(roots, {
@@ -77785,7 +79466,8 @@ throw error;
 return result;
 };
 const markDirty = folderIds => {
-const ids = Array.isArray(folderIds) ? folderIds : [folderIds];
+const ids = Array.isArray(folderIds) || folderIds instanceof Set ? Array.from(folderIds) : [folderIds];
+const persistedDirty = [];
 ids.forEach(folderId => {
 const id = canonicalId(folderId);
 if (!isHomeFolderId(id)) return;
@@ -77795,13 +79477,22 @@ state.error = null;
 state.revision++;
 globalDirtyFolders.add(id);
 if (!id) globalDirtyFolders.delete('root');
+persistedDirty.push(id);
 if (activeFullRun) activeFullRun.needsRescan = true;
 if (window.pkPersistentScanStore) {
-    void window.pkPersistentScanStore.removeFolders([id]);
     void window.pkPersistentScanStore.removeDetailed([id]);
 }
 });
-if (fullStatus === 'ready') fullStatus = 'dirty';
+if (persistedDirty.length && window.pkPersistentScanStore && typeof window.pkPersistentScanStore.markDirtyFolders === 'function') {
+    void window.pkPersistentScanStore.markDirtyFolders(persistedDirty);
+}
+if (fullCatalogComplete) {
+    fullStatus = 'ready';
+    scheduleVerify(persistedDirty, { priority: -5, maxAgeMs: 0, reason: 'mark_dirty', delayMs: 120 });
+} else if (fullStatus === 'ready') {
+    fullStatus = 'dirty';
+}
+if (window.pkAnalysisCatalog && typeof window.pkAnalysisCatalog.invalidate === 'function') window.pkAnalysisCatalog.invalidate();
 syncLegacyReadyFlags();
 };
 const markAllDirty = () => {
@@ -77829,7 +79520,7 @@ while (queue.length > 0) {
 const id = canonicalId(queue.pop());
 if (seen.has(id)) continue;
 seen.add(id);
-const files = isDirtyId(id) ? null : getCachedArray(id);
+const files = getCachedArray(id);
 if (!files) continue;
 entries.push([id, files]);
 files.forEach(item => {
@@ -77871,12 +79562,14 @@ globalLineageMap.delete(childId);
 }
 }
 indexRevision++;
+if (window.pkAnalysisCatalog && typeof window.pkAnalysisCatalog.invalidate === 'function') window.pkAnalysisCatalog.invalidate();
 if (window.pkPersistentScanStore && dropped.size) {
     void window.pkPersistentScanStore.removeFolders(Array.from(dropped));
     void window.pkPersistentScanStore.removeDetailed(Array.from(dropped));
 }
 if (activeFullRun) activeFullRun.needsRescan = true;
-if (fullStatus === 'ready') fullStatus = 'dirty';
+if (fullCatalogComplete) fullStatus = 'ready';
+else if (fullStatus === 'ready') fullStatus = 'dirty';
 syncLegacyReadyFlags();
 return Array.from(dropped);
 };
@@ -77887,9 +79580,11 @@ derivedCache.clear();
 if (activeFullRun && activeFullRun.abortController) activeFullRun.abortController.abort();
 activeFullRun = null;
 indexRevision = 0;
+fullCatalogComplete = false;
 fullStatus = 'idle';
 persistentFullRestorePromise = null;
 persistentFullRestoreAttempted = false;
+if (window.pkAnalysisCatalog && typeof window.pkAnalysisCatalog.invalidate === 'function') window.pkAnalysisCatalog.invalidate();
 cancelVerificationQueue();
 syncLegacyReadyFlags();
 if (options.dropPersistent !== false && window.pkPersistentScanStore) {
@@ -77919,7 +79614,10 @@ return value;
 },
 getStatus: () => fullStatus,
 getRevision: () => indexRevision,
-isReady: () => fullStatus === 'ready' && !hasDirtyHomeFolders() && !hasUnstableMutations(),
+isReady: () => fullCatalogComplete && fullStatus === 'ready',
+hasCompleteCatalog: () => fullCatalogComplete,
+getDirtyIds: () => Array.from(globalDirtyFolders).map(canonicalId).filter(isHomeFolderId),
+getDirtyCount: () => Array.from(globalDirtyFolders).map(canonicalId).filter(isHomeFolderId).length,
 isCompleteFolder: canReuseCachedFolder,
 getVerifiedAt: getFolderVerifiedAt,
 isVerifiedFresh: isFolderVerifiedFresh,
@@ -77936,6 +79634,210 @@ reset
 };
 })();
 window.pkGlobalIndex = GlobalIndex;
+
+// 4.6.44: one metadata catalog shared by global search, file dedupe, folder dedupe
+// and visual dedupe. The catalog is derived only from GlobalIndex's direct folder
+// listings, so rebuilding a result no longer walks the same directory tree again.
+const AnalysisCatalog = (() => {
+let fullCacheRevision = -1;
+let fullCache = null;
+const normalizeId = value => {
+    const id = String(value === undefined || value === null ? '' : value).trim();
+    return !id || id === 'root' ? '' : id;
+};
+const cachedItems = folderId => {
+    const id = normalizeId(folderId);
+    const direct = typeof globalCache !== 'undefined' ? globalCache.get(id) : null;
+    if (Array.isArray(direct)) return direct;
+    if (!id && typeof globalCache !== 'undefined') {
+        const alias = globalCache.get('root');
+        if (Array.isArray(alias)) return alias;
+    }
+    return null;
+};
+const lineageOf = (folderId, fallback = []) => {
+    const id = normalizeId(folderId);
+    const known = typeof globalLineageMap !== 'undefined' ? globalLineageMap.get(id || 'root') || globalLineageMap.get(id) : null;
+    if (Array.isArray(known)) return known.map(x => ({ id: (x && x.id) || '', name: (x && x.name) || '' }));
+    return Array.isArray(fallback) ? fallback.map(x => ({ id: (x && x.id) || '', name: (x && x.name) || '' })) : [];
+};
+const build = (rootNodes = [{ id: '', name: 'Root', lineage: [] }]) => {
+    const roots = (Array.isArray(rootNodes) ? rootNodes : [rootNodes]).filter(Boolean).map(node => ({
+        id: normalizeId(node && typeof node === 'object' ? node.id : node),
+        name: node && typeof node === 'object' ? (node.name || '') : '',
+        lineage: node && typeof node === 'object' ? lineageOf(node.id, node.lineage || []) : lineageOf(node, [])
+    }));
+    const queue = roots.slice();
+    const seenFolders = new Set();
+    const entries = [];
+    const files = [];
+    const folders = [];
+    const fileById = new Map();
+    const folderById = new Map();
+    const parentByFolderId = new Map();
+    const childrenByFolderId = new Map();
+    const rootIds = new Set(roots.map(x => x.id));
+    while (queue.length) {
+        const cur = queue.shift();
+        const id = normalizeId(cur.id);
+        if (seenFolders.has(id)) continue;
+        const items = cachedItems(id);
+        if (!Array.isArray(items)) continue;
+        seenFolders.add(id);
+        entries.push([id, items]);
+        const folderLineage = lineageOf(id, cur.lineage || []);
+        if (!folderById.has(id)) {
+            const tail = folderLineage.length ? folderLineage[folderLineage.length - 1] : null;
+            folderById.set(id, { id, kind: 'drive#folder', name: cur.name || (tail && tail.name) || (id ? '' : 'Root'), _lineage: folderLineage.slice(0, Math.max(0, folderLineage.length - (id ? 1 : 0))) });
+        }
+        const childIds = [];
+        for (const raw of items) {
+            if (!raw || !raw.id) continue;
+            if (raw.kind === 'drive#folder') {
+                const childId = normalizeId(raw.id);
+                const childLineage = lineageOf(childId, [...folderLineage, { id: raw.id, name: raw.name || '' }]);
+                const parentLineage = folderLineage.slice();
+                const folder = { ...raw, _lineage: parentLineage, _catalogLineage: childLineage, _catalogParentId: id };
+                if (!folderById.has(childId)) folders.push(folder);
+                folderById.set(childId, folder);
+                parentByFolderId.set(childId, id);
+                childIds.push(childId);
+                queue.push({ id: childId, name: raw.name || '', lineage: childLineage });
+            } else {
+                const file = { ...raw, _lineage: folderLineage.slice(), _catalogParentId: id };
+                files.push(file);
+                fileById.set(String(file.id), file);
+            }
+        }
+        childrenByFolderId.set(id, childIds);
+    }
+
+    // Recursive folder size/file-count, derived once per GlobalIndex revision.
+    const folderStats = new Map();
+    seenFolders.forEach(id => folderStats.set(id, { bytes: 0, files: 0 }));
+    const addToAncestors = (startId, bytes) => {
+        let cur = normalizeId(startId);
+        const guard = new Set();
+        while (!guard.has(cur)) {
+            guard.add(cur);
+            if (!folderStats.has(cur)) folderStats.set(cur, { bytes: 0, files: 0 });
+            const stat = folderStats.get(cur);
+            stat.bytes += Math.max(0, Number(bytes) || 0);
+            stat.files += 1;
+            if (rootIds.has(cur) || !parentByFolderId.has(cur)) break;
+            cur = normalizeId(parentByFolderId.get(cur));
+        }
+    };
+    files.forEach(file => addToAncestors(file._catalogParentId, file.size));
+
+    return {
+        revision: window.pkGlobalIndex && typeof window.pkGlobalIndex.getRevision === 'function' ? window.pkGlobalIndex.getRevision() : 0,
+        rootIds, entries, files, folders, fileById, folderById, parentByFolderId, childrenByFolderId, folderStats,
+        folderCount: seenFolders.size,
+        fileCount: files.length
+    };
+};
+const getFull = () => {
+    if (!window.pkGlobalIndex || !window.pkGlobalIndex.isReady()) return null;
+    const revision = window.pkGlobalIndex.getRevision();
+    if (fullCache && fullCacheRevision === revision) return fullCache;
+    fullCache = build([{ id: '', name: 'Root', lineage: [] }]);
+    fullCacheRevision = revision;
+    return fullCache;
+};
+const ensureFull = async (options = {}) => {
+    if (!window.pkGlobalIndex) throw new Error('GLOBAL_INDEX_UNAVAILABLE');
+    const result = await window.pkGlobalIndex.ensureFull(options);
+    if (!result || result.status !== 'ready') {
+        const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+        error.code = 'GLOBAL_INDEX_INCOMPLETE';
+        throw error;
+    }
+    return getFull();
+};
+const ensureScope = async (rootNodes, options = {}) => {
+    const roots = (Array.isArray(rootNodes) ? rootNodes : [rootNodes]).filter(Boolean);
+    if (!roots.length || roots.some(node => !normalizeId(node && typeof node === 'object' ? node.id : node))) {
+        const full = await ensureFull(options);
+        if (!roots.length || roots.some(node => !normalizeId(node && typeof node === 'object' ? node.id : node))) return full;
+    }
+    if (!window.pkGlobalIndex) throw new Error('GLOBAL_INDEX_UNAVAILABLE');
+    const result = await window.pkGlobalIndex.ensureScope(roots, options);
+    if (!result || result.status !== 'ready') {
+        const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+        error.code = 'GLOBAL_INDEX_INCOMPLETE';
+        throw error;
+    }
+    return build(roots);
+};
+const collectScopeFiles = async (rootNodes, directItems = [], options = {}) => {
+    const snapshot = await ensureScope(rootNodes, options);
+    const map = new Map();
+    (Array.isArray(directItems) ? directItems : []).forEach(item => {
+        if (!item || item.kind === 'drive#folder' || !item.id) return;
+        map.set(String(item.id), item);
+    });
+    snapshot.files.forEach(file => map.set(String(file.id), file));
+    return { snapshot, files: Array.from(map.values()) };
+};
+const buildFolderAggregate = async (rootNodes, options = {}) => {
+    const minBytes = Math.max(0, Number(options.minBytes) || 0);
+    const signal = options.signal;
+    const snapshot = await ensureScope(rootNodes, options);
+    const nodeMap = new Map();
+    const roots = (Array.isArray(rootNodes) ? rootNodes : [rootNodes]).filter(Boolean);
+    roots.forEach(root => {
+        const id = normalizeId(root.id);
+        const lineage = Array.isArray(root.lineage) ? root.lineage : lineageOf(id, []);
+        nodeMap.set(id, {
+            id, name: root.name || '', icon_link: root.icon_link, starred: root.starred, tags: root.tags,
+            modified_time: root.modified_time || '', size: 0, parentId: null, marked: false,
+            _pathStr: root._pathStr || lineage.map(x => x.name).join('/'), lineage, isRoot: true, files: []
+        });
+    });
+    // Ensure every descendant folder has a node, preserving the actual parent chain.
+    snapshot.entries.forEach(([parentId, items]) => {
+        if (signal && signal.aborted) return;
+        if (!nodeMap.has(parentId) && !snapshot.rootIds.has(parentId)) return;
+        for (const sub of items) {
+            if (!sub || sub.kind !== 'drive#folder' || !sub.id) continue;
+            const childId = normalizeId(sub.id);
+            if (nodeMap.has(childId)) continue;
+            const childLineage = lineageOf(childId, []);
+            nodeMap.set(childId, {
+                id: childId, name: sub.name || '', icon_link: sub.icon_link, starred: sub.starred, tags: sub.tags,
+                modified_time: sub.modified_time || sub.created_time || '', size: 0, parentId: normalizeId(parentId), marked: false,
+                _pathStr: childLineage.map(x => x.name).join('/'), lineage: childLineage, isRoot: false, files: []
+            });
+        }
+    });
+    const propagate = (parentId, file) => {
+        const sz = Math.max(0, Number(file && file.size) || 0);
+        const contentHash = String(file && (file.hash || file.gcid || file.md5_checksum) || '').trim().toLocaleLowerCase();
+        const fingerprint = contentHash ? `H|${contentHash}|${sz}` : `U|${String(file && file.name || '').trim()}|${sz}`;
+        let cur = normalizeId(parentId);
+        const guard = new Set();
+        while (!guard.has(cur) && nodeMap.has(cur)) {
+            guard.add(cur);
+            const node = nodeMap.get(cur);
+            node.size += sz;
+            node.files.push(fingerprint);
+            if (!node.isRoot && node.size >= minBytes) node.marked = true;
+            cur = node.parentId;
+            if (cur === null || cur === undefined) break;
+            cur = normalizeId(cur);
+        }
+    };
+    snapshot.files.forEach(file => propagate(file._catalogParentId, file));
+    if (typeof options.onProgress === 'function') {
+        try { options.onProgress({ folders: snapshot.folderCount, files: snapshot.fileCount, fromCatalog: true }); } catch (e) {}
+    }
+    return { nodeMap, snapshot, totalFiles: snapshot.fileCount, totalDirs: snapshot.folderCount };
+};
+const invalidate = () => { fullCache = null; fullCacheRevision = -1; };
+return { build, getFull, ensureFull, ensureScope, collectScopeFiles, buildFolderAggregate, invalidate };
+})();
+window.pkAnalysisCatalog = AnalysisCatalog;
 
 const syncTime = (headers) => {
 if (!headers) return;
