@@ -4,7 +4,7 @@
 
 ## 在线安装和自动更新
 
-**[点击安装 PikPak 增强大师（4.6.63）](https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/PikPak_Enhancement_Master.user.js)**
+**[点击安装 PikPak 增强大师（4.6.64）](https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/PikPak_Enhancement_Master.user.js)**
 
 1. 浏览器安装并启用 [Tampermonkey](https://www.tampermonkey.net/)。
 2. 点击上述 `.user.js` 安装链接，在 Tampermonkey 确认安装或更新。
@@ -17,6 +17,12 @@
 - 版本清单：[`version.json`](https://raw.githubusercontent.com/masakacj/pikpak-enhancement-online/main/version.json)
 
 安装后 Tampermonkey 使用脚本的 `@updateURL` / `@downloadURL`，不再从原作者的更新服务覆盖定制功能。`@name` 和 `@namespace` 保持与旧版一致，便于已有自定义 4.6.20 的用户迁移；**如果已安装原作者最新版，应在油猴中核对是否覆盖了原脚本，避免同时运行两份相同功能的脚本**。
+
+## 4.6.64 更新
+
+- 右键快捷选择采用追加勾选，保留之前已选择的文件。
+- 删除前检查是否将任意重复组全部文件勾选，弹出危险警告并提供跳转到相关重复组的入口；选择跳转即取消本次删除。
+- 保留 4.6.63 的其他功能与安全删除复核。
 
 ## 4.6.63 更新（保留 4.6.62 完整功能）
 
@@ -35,7 +41,7 @@
 
 ## 本版功能
 
-**版本：4.6.63**
+**版本：4.6.64**
 
 - 包含 4.6.20 的「导出目录 → 大小明细（CSV）」，方便把 PikPak 文件清单与 mcphome 上的 Everything 索引做粗匹配。
 - CSV 提供 `cloud_path`, `filename`, `size_bytes`, `file_id`, `parent_id`, `mime_type`, `cloud_hash`, `modified_time`。
@@ -59,6 +65,7 @@ node tests/export-size-csv.test.cjs
 node tests/update-channel.test.cjs
 node tests/import-verified-csv.test.cjs
 node tests/dup-context-path.test.cjs
+node tests/dup-full-group-warning.test.cjs
 ```
 
 新版本应同时同步 `.user.js`、`.meta.js` 与 `version.json` 的版本号和更新地址，并通过以上测试。正式发布时先更新完整脚本与版本清单、**最后更新 `.meta.js`**，避免 Tampermonkey 提前发现版本号而下载到旧脚本。GitHub Raw/CDN 可能有短暂缓存，更新不是即时推送。

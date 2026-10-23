@@ -17,7 +17,7 @@ const files = [
   { id: 'f', kind: 'drive#file', _dupFullPath: 'Root/C' }
 ];
 const groups = [{ ids:['a','b'] }, { ids:['c','d'] }, { ids:['e','f'] }];
-function run(scope, inside, folderMode = false) {
+function run(scope, inside, folderMode = false, preselected = []) {
   const S = {
     dupMode: true,
     dupGroupView: folderMode ? 'folders' : 'files',
@@ -29,6 +29,7 @@ function run(scope, inside, folderMode = false) {
       { _dupFolderStatsRow:true, _dupFolderStatsPath:'Root/B', _dupFolderStatsFileIds:['b','e'] },
       { _dupFolderStatsRow:true, _dupFolderStatsPath:'Root/C', _dupFolderStatsFileIds:['f'] }
     ] : files,
+    getSelectedIds() { return this.selected || preselected; },
     setExplicitSelection(ids) { this.selected = ids; }
   };
   const messages = [];
@@ -36,7 +37,7 @@ function run(scope, inside, folderMode = false) {
   vm.createContext(ctx);
   vm.runInContext(helper, ctx);
   ctx.selectDupFilesByContextPath(scope, inside);
-  return { ids: Array.from(S.selected || []).sort(), messages };
+  return { ids: Array.from(S.getSelectedIds()).sort(), messages };
 }
 assert.deepEqual(run('Root/A',true).ids,['a'], 'select only overlapping files inside A');
 assert.deepEqual(run('Root/A',false).ids,['b'], 'select only overlapping files outside A');
@@ -44,6 +45,8 @@ assert.deepEqual(run('Root/B',true).ids,['b','e'], 'select both overlapping grou
 assert.deepEqual(run('Root/B',false).ids,['a','f'], 'select other paths for B');
 assert.deepEqual(run('Root/A',true,true).ids,['a'], 'folder stats mode selects original file ids');
 assert.equal(run('Root/Z',true).ids.length,0,'unmatched path does not modify selection');
+assert.deepEqual(run('Root/A',true,false,['e']).ids,['a','e'], 'quick selection preserves prior checked files');
+assert.deepEqual(run('Root/A',true,false,['a','e']).ids,['a','e'], 'repeated quick selection is idempotent');
 assert(code.includes("dupPathInside.textContent = '选择此路径中相同的文件'"));
 assert(code.includes("dupPathOutside.textContent = '选择其他路径中相同的文件'"));
 assert(code.includes('_dupFolderDuplicateCount: visualDuplicateCount'));

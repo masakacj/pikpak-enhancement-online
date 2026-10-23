@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.6.63
+// @version            4.6.64
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -24159,7 +24159,8 @@ function selectDupFilesByContextPath(rawPath, selectInside) {
     };
     const index = S.dupItemMap instanceof Map ? S.dupItemMap : new Map((S.items || []).filter(Boolean).map(file => [file.id, file]));
     const buckets = S.dupBuckets && Array.isArray(S.dupBuckets.all) ? S.dupBuckets.all : (S.dupRawGroups || []);
-    const selected = new Set();
+    const selected = new Set(S.getSelectedIds());
+    const originalSelectedCount = selected.size;
     const visibleIds = new Set((S.display || []).filter(row => row && !row.isHeader && !row._dupFolderStatsRow).map(row => String(row.id)));
     const folderMode = S.dupGroupView === 'folders';
     const allowedFolderIds = folderMode ? new Set((S.display || []).filter(row => row && row._dupFolderStatsRow).flatMap(row => row._dupFolderStatsFileIds || []).map(String)) : null;
@@ -24171,11 +24172,11 @@ function selectDupFilesByContextPath(rawPath, selectInside) {
         if (!inside.length || !outside.length) continue;
         for (const file of (selectInside ? inside : outside)) selected.add(file.id);
     }
-    if (!selected.size) { showToast('当前路径没有与其他路径相同的匹配文件', 'warning', 3500); return; }
+    if (selected.size === originalSelectedCount) { showToast('没有新增可勾选的匹配文件', 'warning', 3500); return; }
     S.setExplicitSelection(Array.from(selected));
     renderVisible();
     updateStat();
-    showToast(`已选择 ${selected.size} 个匹配文件`, 'success', 3000);
+    showToast(`本次新增 ${selected.size - originalSelectedCount} 项，当前共选中 ${selected.size} 项`, 'success', 3000);
 }
 
 function annotateDupFolderMeta(item, metaMap, duplicateCountMap = null) {
@@ -63711,6 +63712,44 @@ handleMagnetArchiveCheckSelected();
 };
 }
 
+function findFullySelectedDupGroups(ids) {
+    if (!S.dupMode) return [];
+    const selected = new Set(ids.map(String));
+    const index = S.dupItemMap instanceof Map ? S.dupItemMap : S.itemMap;
+    const groups = S.dupBuckets && Array.isArray(S.dupBuckets.all) ? S.dupBuckets.all : (S.dupRawGroups || []);
+    return groups.map((group, groupIdx) => {
+        const members = Array.from(new Set((group.ids || []).map(String))).filter(id => index && index.has(id));
+        return members.length >= 2 && members.every(id => selected.has(id)) ? { index: groupIdx, ids: members } : null;
+    }).filter(Boolean);
+}
+
+function confirmFullySelectedDupGroups(groups) {
+    return new Promise(resolve => {
+        const m = showModal([
+            '<h3 style="font-size:18px;color:#d93025">警告：重复组全部勾选</h3>',
+            '<div style="line-height:1.6;margin:12px 0">检测到 ' + groups.length + ' 个重复组全部文件被勾选。删除后可能没有任何保留副本。</div>',
+            '<div style="max-height:180px;overflow:auto">' + groups.slice(0, 15).map((g,i) => '<button type="button" class="pk-btn pk-full-group-jump" data-index="' + i + '" style="display:block;width:100%;margin:5px 0">定位第 ' + (g.index + 1) + ' 组（' + g.ids.length + ' 个文件）</button>').join('') + '</div>',
+            '<div class="pk-modal-act"><button class="pk-btn" id="pk-full-group-cancel">取消删除</button><button class="pk-btn" id="pk-full-group-continue">仍要继续</button></div>'
+        ].join(''));
+        const close = result => { m.remove(); resolve(result); };
+        m.querySelectorAll('.pk-full-group-jump').forEach(btn => {
+            btn.onclick = () => {
+                const group = groups[Number(btn.dataset.index)];
+                close(false);
+                S.dupGroupView = 'files';
+                S.search = '';
+                renderDupView();
+                const idx = S.display.findIndex(row => row && !row.isHeader && group.ids.includes(String(row.id)));
+                if (idx >= 0) { UI.vp.scrollTop = Math.max(0, getItemScrollTopByIndex(idx) - 50); renderVisible(); }
+                else showToast('该组当前受其他查重筛选条件影响，暂不可见', 'warning');
+            };
+        });
+        m.querySelector('#pk-full-group-cancel').onclick = () => close(false);
+        m.querySelector('#pk-full-group-continue').onclick = () => close(true);
+        m.querySelector('.pk-modal-close').onclick = () => close(false);
+    });
+}
+
 UI.btnDel.onclick = async () => {
 const selectedIds = S.getSelectedIds();
 const count = selectedIds.length;
@@ -63885,6 +63924,8 @@ showAlert(L.msg_del_none);
 return;
 }
 
+const fullDupGroups = findFullySelectedDupGroups(toDeleteIds);
+if (fullDupGroups.length && !await confirmFullySelectedDupGroups(fullDupGroups)) return;
 const delRes = await showDeleteConfirm(L.warn_del.replace('{n}', toDeleteIds.length));
 if (!delRes.confirm) return;
 
